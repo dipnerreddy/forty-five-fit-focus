@@ -11,20 +11,38 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  console.log('PublicRoute: Component mounting...');
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('PublicRoute: Checking authentication...');
+        
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('PublicRoute: Session error:', sessionError);
+          setError(`Session error: ${sessionError.message}`);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('PublicRoute: Session data:', session ? 'User logged in' : 'No session');
         
         if (session) {
+          console.log('PublicRoute: User authenticated, redirecting to dashboard...');
           navigate('/dashboard');
           return;
         }
         
+        console.log('PublicRoute: No session, showing public content');
         setIsAuthenticated(false);
       } catch (error) {
-        console.error('Auth check error:', error);
+        console.error('PublicRoute: Auth check error:', error);
+        setError(`Auth check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
@@ -36,19 +54,44 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('PublicRoute: Auth state change:', event, session ? 'User logged in' : 'No session');
+        
         if (session) {
+          console.log('PublicRoute: Auth state change - redirecting to dashboard');
           navigate('/dashboard');
         } else {
+          console.log('PublicRoute: Auth state change - no session');
           setIsAuthenticated(false);
         }
         setIsLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('PublicRoute: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Connection Error</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
+    console.log('PublicRoute: Still loading...');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-3">
@@ -60,9 +103,11 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   }
 
   if (isAuthenticated) {
+    console.log('PublicRoute: User authenticated, should redirect...');
     return null; // Will redirect to dashboard
   }
 
+  console.log('PublicRoute: Rendering public content');
   return <>{children}</>;
 };
 

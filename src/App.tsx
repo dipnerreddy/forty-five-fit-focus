@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -16,62 +17,78 @@ import Signup from "./pages/Signup";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <TutorialProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes - only accessible when NOT logged in */}
-            <Route path="/" element={
-              <PublicRoute>
-                <Index />
-              </PublicRoute>
-            } />
-            <Route path="/login" element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            } />
-            <Route path="/signup" element={
-              <PublicRoute>
-                <Signup />
-              </PublicRoute>
-            } />
-            
-            {/* Protected routes - only accessible when logged in */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <Analytics />
-              </ProtectedRoute>
-            } />
-            <Route path="/certificate" element={
-              <ProtectedRoute>
-                <Certificate />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TutorialProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+console.log('App component loading...');
+console.log('Current URL:', window.location.href);
+
+const App = () => {
+  console.log('App component rendering...');
+  
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <TutorialProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes - only accessible when NOT logged in */}
+                <Route path="/" element={
+                  <PublicRoute>
+                    <Index />
+                  </PublicRoute>
+                } />
+                <Route path="/login" element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                } />
+                <Route path="/signup" element={
+                  <PublicRoute>
+                    <Signup />
+                  </PublicRoute>
+                } />
+                
+                {/* Protected routes - only accessible when logged in */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <Analytics />
+                  </ProtectedRoute>
+                } />
+                <Route path="/certificate" element={
+                  <ProtectedRoute>
+                    <Certificate />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TutorialProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

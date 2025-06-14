@@ -1,13 +1,18 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Flame, Target, Calendar, Trophy } from 'lucide-react';
+import DebugInfo from '@/components/DebugInfo';
 
 const Index = () => {
+  console.log('Index page rendering...');
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-gray-50">
+      {/* Debug info - remove this after fixing */}
+      <DebugInfo />
+      
       {/* Hero Section */}
       <div className="px-4 py-8 sm:py-16">
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
