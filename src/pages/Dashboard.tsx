@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchWorkoutPlan, getTodaysWorkout } from '@/utils/workoutData';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useWorkoutCompletion } from '@/hooks/useWorkoutCompletion';
+import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 
 // Import components
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -158,6 +159,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <TutorialOverlay />
+      
       {showReviewForm && (
         <CompletionReviewForm
           userName={user.name}
@@ -166,23 +169,29 @@ const Dashboard = () => {
       )}
 
       <div className="pb-20 px-4 pt-6 space-y-4">
-        <DashboardHeader 
-          userName={user.name}
-          currentDay={user.currentDay}
-          streak={user.streak}
-        />
+        <div data-tutorial="header">
+          <DashboardHeader 
+            userName={user.name}
+            currentDay={user.currentDay}
+            streak={user.streak}
+          />
+        </div>
 
-        <ProgressCard 
-          completedSets={completedSets}
-          totalSets={totalSets}
-        />
+        <div data-tutorial="progress">
+          <ProgressCard 
+            completedSets={completedSets}
+            totalSets={totalSets}
+          />
+        </div>
 
         {workoutDetails && (
-          <WorkoutDetailsCard 
-            dayTitle={workoutDetails.dayTitle}
-            dayFocus={workoutDetails.dayFocus}
-            routine={user.routine}
-          />
+          <div data-tutorial="workout-details">
+            <WorkoutDetailsCard 
+              dayTitle={workoutDetails.dayTitle}
+              dayFocus={workoutDetails.dayFocus}
+              routine={user.routine}
+            />
+          </div>
         )}
 
         {workoutDetails?.cardioNotes && (
@@ -190,19 +199,21 @@ const Dashboard = () => {
         )}
 
         {currentActiveExercise && (
-          <CurrentExerciseCard
-            exercise={currentActiveExercise.exercise}
-            category={currentActiveExercise.category}
-            routine={user.routine}
-            onSetChange={(setIndex, completed) => {
-              const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
-              updateSet(actualIndex, setIndex, completed);
-            }}
-            onWeightChange={(weight) => {
-              const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
-              updateWeight(actualIndex, weight);
-            }}
-          />
+          <div data-tutorial="current-exercise">
+            <CurrentExerciseCard
+              exercise={currentActiveExercise.exercise}
+              category={currentActiveExercise.category}
+              routine={user.routine}
+              onSetChange={(setIndex, completed) => {
+                const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+                updateSet(actualIndex, setIndex, completed);
+              }}
+              onWeightChange={(weight) => {
+                const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+                updateWeight(actualIndex, weight);
+              }}
+            />
+          </div>
         )}
 
         {todaysWorkout.length === 0 && (
@@ -215,16 +226,20 @@ const Dashboard = () => {
         )}
 
         {todaysWorkout.length > 0 && (
-          <CompleteWorkoutButton
-            isWorkoutComplete={isWorkoutComplete()}
-            onCompleteWorkout={completeWorkout}
-          />
+          <div data-tutorial="complete-button">
+            <CompleteWorkoutButton
+              isWorkoutComplete={isWorkoutComplete()}
+              onCompleteWorkout={completeWorkout}
+            />
+          </div>
         )}
 
         <MotivationCard quote={dailyQuote} />
       </div>
 
-      <BottomNavigation />
+      <div data-tutorial="bottom-nav">
+        <BottomNavigation />
+      </div>
     </div>
   );
 };
