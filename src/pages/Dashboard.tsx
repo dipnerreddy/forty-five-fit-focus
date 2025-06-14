@@ -1,15 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Home, Dumbbell, Flame, User, BarChart3, Check, Target, Zap, Activity } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchWorkoutPlan, getTodaysWorkout, WorkoutExercise, DayWorkout } from '@/utils/workoutData';
+import { fetchWorkoutPlan, getTodaysWorkout } from '@/utils/workoutData';
+
+// Import new components
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import ProgressCard from '@/components/dashboard/ProgressCard';
+import WorkoutDetailsCard from '@/components/dashboard/WorkoutDetailsCard';
+import CardioNotesCard from '@/components/dashboard/CardioNotesCard';
+import CurrentExerciseCard from '@/components/dashboard/CurrentExerciseCard';
+import CompleteWorkoutButton from '@/components/dashboard/CompleteWorkoutButton';
+import MotivationCard from '@/components/dashboard/MotivationCard';
+import BottomNavigation from '@/components/dashboard/BottomNavigation';
 
 interface Exercise {
   title: string;
@@ -204,7 +209,7 @@ const Dashboard = () => {
       const exercise = mainExercises[i];
       const isCompleted = exercise.sets.every(set => set === true);
       if (!isCompleted) {
-        return { exercise, category: 'Main', index: i };
+        return { exercise, category: 'Main' as const, index: i };
       }
     }
     
@@ -213,7 +218,7 @@ const Dashboard = () => {
       const exercise = coreExercises[i];
       const isCompleted = exercise.sets.every(set => set === true);
       if (!isCompleted) {
-        return { exercise, category: 'Core', index: i };
+        return { exercise, category: 'Core' as const, index: i };
       }
     }
     
@@ -235,149 +240,47 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="pb-20 px-4 pt-6 space-y-4">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Hi {user.name}
-          </h1>
-          <div className="flex items-center justify-center gap-2">
-            <Badge variant="outline" className="px-3 py-1">
-              Day {user.currentDay} of 45
-            </Badge>
-            <div className="flex items-center gap-1 text-orange-500">
-              <Flame className="h-4 w-4" />
-              <span className="font-semibold">{user.streak}</span>
-            </div>
-          </div>
-        </div>
+        <DashboardHeader 
+          userName={user.name}
+          currentDay={user.currentDay}
+          streak={user.streak}
+        />
 
         {/* Progress Card */}
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-orange-100 text-sm">Today's Progress</p>
-                <p className="text-2xl font-bold">{completedSets}/{totalSets}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                <span className="text-sm">Sets</span>
-              </div>
-            </div>
-            
-            <div className="w-full bg-white/20 rounded-full h-2">
-              <div 
-                className="bg-white h-2 rounded-full transition-all duration-300"
-                style={{ width: totalSets > 0 ? `${(completedSets / totalSets) * 100}%` : '0%' }}
-              />
-            </div>
-            <p className="text-orange-100 text-sm mt-2">
-              Sets completed
-            </p>
-          </CardContent>
-        </Card>
+        <ProgressCard 
+          completedSets={completedSets}
+          totalSets={totalSets}
+        />
 
         {/* Workout Details Card */}
         {workoutDetails && (
-          <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  <h2 className="text-xl font-bold">{workoutDetails.dayTitle}</h2>
-                </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                  {user.routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> : <Home className="h-4 w-4 mr-1" />}
-                  {user.routine}
-                </Badge>
-              </div>
-              <p className="text-blue-100 text-sm">{workoutDetails.dayFocus}</p>
-            </CardContent>
-          </Card>
+          <WorkoutDetailsCard 
+            dayTitle={workoutDetails.dayTitle}
+            dayFocus={workoutDetails.dayFocus}
+            routine={user.routine}
+          />
         )}
 
         {/* Cardio/Notes Card */}
         {workoutDetails?.cardioNotes && (
-          <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-l-green-500">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Activity className="h-5 w-5 text-green-600" />
-                <h3 className="font-semibold text-green-800">Cardio / Notes</h3>
-              </div>
-              <p className="text-green-700 text-sm leading-relaxed whitespace-pre-line">
-                {workoutDetails.cardioNotes}
-              </p>
-            </CardContent>
-          </Card>
+          <CardioNotesCard cardioNotes={workoutDetails.cardioNotes} />
         )}
 
         {/* Current Active Exercise */}
         {currentActiveExercise && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2">
-              {currentActiveExercise.category === 'Main' ? (
-                <>
-                  <Target className="h-5 w-5 text-gray-600" />
-                  <h3 className="font-semibold text-gray-800">Current Exercise - Main</h3>
-                </>
-              ) : (
-                <>
-                  <Zap className="h-5 w-5 text-purple-600" />
-                  <h3 className="font-semibold text-gray-800">Current Exercise - Core</h3>
-                </>
-              )}
-            </div>
-            
-            <Card className={`border-0 shadow-lg ${currentActiveExercise.category === 'Core' ? 'border-l-4 border-l-purple-500' : ''}`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{currentActiveExercise.exercise.title}</h3>
-                  {user.routine === 'Gym' && (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        placeholder="kg"
-                        value={currentActiveExercise.exercise.weight || ''}
-                        onChange={(e) => {
-                          const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
-                          updateWeight(actualIndex, Number(e.target.value));
-                        }}
-                        className="w-16 h-8 text-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                  {currentActiveExercise.exercise.sets.map((completed, setIndex) => (
-                    <div key={setIndex} className="flex items-center justify-center">
-                      <Checkbox
-                        checked={completed}
-                        onCheckedChange={(checked) => {
-                          const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
-                          updateSet(actualIndex, setIndex, checked as boolean);
-                        }}
-                        className="w-6 h-6"
-                      />
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">{currentActiveExercise.exercise.sets.length} sets × {currentActiveExercise.exercise.reps}</div>
-                  <div className="flex justify-center space-x-1">
-                    {currentActiveExercise.exercise.sets.map((completed, setIndex) => (
-                      <div
-                        key={setIndex}
-                        className={`w-2 h-2 rounded-full ${
-                          completed ? (currentActiveExercise.category === 'Core' ? 'bg-purple-500' : 'bg-orange-500') : 'bg-gray-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <CurrentExerciseCard
+            exercise={currentActiveExercise.exercise}
+            category={currentActiveExercise.category}
+            routine={user.routine}
+            onSetChange={(setIndex, completed) => {
+              const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+              updateSet(actualIndex, setIndex, completed);
+            }}
+            onWeightChange={(weight) => {
+              const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+              updateWeight(actualIndex, weight);
+            }}
+          />
         )}
 
         {/* No Workout Message */}
@@ -392,68 +295,18 @@ const Dashboard = () => {
 
         {/* Complete Workout Button */}
         {todaysWorkout.length > 0 && (
-          <div className="px-4 py-6">
-            <Button
-              onClick={completeWorkout}
-              disabled={!isWorkoutComplete()}
-              className={`w-full h-14 text-lg font-semibold rounded-xl ${
-                isWorkoutComplete() 
-                  ? 'bg-green-500 hover:bg-green-600 text-white' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isWorkoutComplete() ? (
-                <div className="flex items-center gap-2">
-                  <Check className="h-5 w-5" />
-                  Complete Workout
-                </div>
-              ) : (
-                '🔒 Complete All Sets'
-              )}
-            </Button>
-          </div>
+          <CompleteWorkoutButton
+            isWorkoutComplete={isWorkoutComplete()}
+            onCompleteWorkout={completeWorkout}
+          />
         )}
 
         {/* Daily Motivation */}
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50">
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-blue-800 font-medium text-sm">💪 Daily Motivation</p>
-              <p className="text-blue-700 italic mt-2 text-sm leading-relaxed">
-                "{dailyQuote}"
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <MotivationCard quote={dailyQuote} />
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
-        <div className="flex justify-around items-center">
-          <button 
-            className="flex flex-col items-center py-2 px-4 text-orange-500"
-          >
-            <Home className="h-6 w-6" />
-            <span className="text-xs mt-1 font-medium">Workout</span>
-          </button>
-          
-          <button 
-            onClick={() => navigate('/analytics')}
-            className="flex flex-col items-center py-2 px-4 text-gray-400 hover:text-gray-600"
-          >
-            <BarChart3 className="h-6 w-6" />
-            <span className="text-xs mt-1">Stats</span>
-          </button>
-          
-          <button 
-            onClick={() => navigate('/profile')}
-            className="flex flex-col items-center py-2 px-4 text-gray-400 hover:text-gray-600"
-          >
-            <User className="h-6 w-6" />
-            <span className="text-xs mt-1">Profile</span>
-          </button>
-        </div>
-      </div>
+      <BottomNavigation />
     </div>
   );
 };
