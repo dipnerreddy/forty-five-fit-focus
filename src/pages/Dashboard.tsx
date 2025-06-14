@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Home, Dumbbell, Flame } from 'lucide-react';
+import { Home, Dumbbell, Flame, User, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Exercise {
   title: string;
@@ -23,12 +25,14 @@ interface User {
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [user] = useState<User>({
-    name: "Alex",
-    currentDay: 12,
-    streak: 12,
-    routine: 'Gym'
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User>({
+    name: "Loading...",
+    currentDay: 1,
+    streak: 0,
+    routine: 'Home'
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([
     { title: "Push-ups", sets: [false, false, false, false] },
@@ -38,6 +42,45 @@ const Dashboard = () => {
   ]);
 
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate('/login');
+          return;
+        }
+
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('name, current_day, streak, routine')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+
+        if (profile) {
+          setUser({
+            name: profile.name,
+            currentDay: profile.current_day,
+            streak: profile.streak,
+            routine: profile.routine as 'Home' | 'Gym'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
 
   const updateSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
     setTodaysWorkout(prev => {
@@ -61,28 +104,106 @@ const Dashboard = () => {
     );
   };
 
-  const completeWorkout = () => {
-    if (isWorkoutComplete()) {
+  const completeWorkout = async () => {
+    if (!isWorkoutComplete()) {
+      toast({
+        title: "Workout Incomplete",
+        description: "Please complete all sets before finishing your workout.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Record daily completion
+      const { error: completionError } = await supabase
+        .from('daily_completions')
+        .insert({
+          user_id: session.user.id,
+          day: user.currentDay
+        });
+
+      if (completionError && !completionError.message.includes('duplicate')) {
+        console.error('Error recording completion:', completionError);
+        return;
+      }
+
+      // Update user progress
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          current_day: user.currentDay + 1,
+          streak: user.streak + 1
+        })
+        .eq('user_id', session.user.id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        return;
+      }
+
+      // Update local state
+      setUser(prev => ({
+        ...prev,
+        currentDay: prev.currentDay + 1,
+        streak: prev.streak + 1
+      }));
+
       toast({
         title: "Workout Complete! 🎉",
         description: `Day ${user.currentDay} conquered! Keep the streak alive!`
       });
+    } catch (error) {
+      console.error('Error completing workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save workout completion. Please try again.",
+        variant: "destructive"
+      });
     }
   };
-
-  useEffect(() => {
-    if (isWorkoutComplete()) {
-      completeWorkout();
-    }
-  }, [todaysWorkout]);
 
   const completedSets = todaysWorkout.reduce((total, exercise) => 
     total + exercise.sets.filter(set => set).length, 0
   );
   const totalSets = todaysWorkout.length * 4;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 space-y-6">
+      {/* Navigation */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">Fitness Challenge</h1>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-2"
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/analytics')}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </Button>
+        </div>
+      </div>
+
       {/* Welcome Panel */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
@@ -162,13 +283,20 @@ const Dashboard = () => {
             </div>
           ))}
           
-          {isWorkoutComplete() && (
-            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-              <p className="text-green-800 font-semibold">
-                🎉 Amazing! You've completed today's workout!
-              </p>
-            </div>
-          )}
+          {/* Complete Workout Button */}
+          <div className="flex justify-center mt-6">
+            <Button
+              onClick={completeWorkout}
+              disabled={!isWorkoutComplete()}
+              className={`px-8 py-3 text-lg font-semibold ${
+                isWorkoutComplete() 
+                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isWorkoutComplete() ? '🎉 Complete Workout' : '🔒 Complete All Sets to Unlock'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
