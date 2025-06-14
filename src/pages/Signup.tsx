@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +17,7 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    age: '',
+    dateOfBirth: '',
     gender: '',
     weight: '',
     routine: ''
@@ -27,10 +27,23 @@ const Signup = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const validateForm = () => {
-    const { name, email, password, age, weight, routine } = formData;
+  const calculateAge = (dateOfBirth: string) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
     
-    if (!name || !email || !password || !age || !weight || !routine) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
+  const validateForm = () => {
+    const { name, email, password, dateOfBirth, weight, routine, gender } = formData;
+    
+    if (!name || !email || !password || !dateOfBirth || !weight || !routine || !gender) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -39,10 +52,10 @@ const Signup = () => {
       return false;
     }
 
-    const ageNum = parseInt(age);
-    if (ageNum < 13 || ageNum > 80) {
+    const age = calculateAge(dateOfBirth);
+    if (age < 13 || age > 80) {
       toast({
-        title: "Invalid Age",
+        title: "Invalid Date of Birth",
         description: "Age must be between 13 and 80",
         variant: "destructive"
       });
@@ -79,6 +92,8 @@ const Signup = () => {
     setIsLoading(true);
     
     try {
+      const age = calculateAge(formData.dateOfBirth);
+      
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -86,10 +101,11 @@ const Signup = () => {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             name: formData.name,
-            age: formData.age,
+            age: age.toString(),
             gender: formData.gender,
             weight: formData.weight,
-            routine: formData.routine
+            routine: formData.routine,
+            date_of_birth: formData.dateOfBirth
           }
         }
       });
@@ -179,17 +195,15 @@ const Signup = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
                 <Input
-                  id="age"
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                  placeholder="13-80"
-                  min="13"
-                  max="80"
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                   required
                   disabled={isLoading}
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </div>
               
@@ -208,39 +222,42 @@ const Signup = () => {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select 
+            <div className="space-y-3">
+              <Label>Gender</Label>
+              <RadioGroup 
                 value={formData.gender} 
                 onValueChange={(value) => handleInputChange('gender', value)}
                 disabled={isLoading}
+                className="flex space-x-6"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="male" id="male" />
+                  <Label htmlFor="male" className="cursor-pointer">Male</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="female" id="female" />
+                  <Label htmlFor="female" className="cursor-pointer">Female</Label>
+                </div>
+              </RadioGroup>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="routine">Workout Routine</Label>
-              <Select 
+            <div className="space-y-3">
+              <Label>Workout Routine</Label>
+              <RadioGroup 
                 value={formData.routine} 
                 onValueChange={(value) => handleInputChange('routine', value)}
                 disabled={isLoading}
+                className="space-y-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose your routine" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Home">🏠 Home Workouts</SelectItem>
-                  <SelectItem value="Gym">🏋️ Gym Workouts</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Home" id="home" />
+                  <Label htmlFor="home" className="cursor-pointer">🏠 Home Workouts</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Gym" id="gym" />
+                  <Label htmlFor="gym" className="cursor-pointer">🏋️ Gym Workouts</Label>
+                </div>
+              </RadioGroup>
             </div>
             
             <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
