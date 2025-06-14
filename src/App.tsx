@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/certificate" element={<Certificate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
