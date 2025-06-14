@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,7 +48,7 @@ const Analytics = () => {
         // Fetch user profile
         const { data: profile } = await supabase
           .from('profiles')
-          .select('current_day, streak')
+          .select('current_day, streak, created_at, routine')
           .eq('user_id', session.user.id)
           .single();
 
@@ -69,10 +68,10 @@ const Analytics = () => {
           .limit(10);
 
         if (profile && workoutSessions) {
-          // Calculate total days from all sessions
-          const totalCompletedDays = workoutSessions.reduce((total, session) => 
-            total + session.days_completed, 0
-          );
+          // Calculate total days since signup (login days)
+          const signupDate = new Date(profile.created_at);
+          const currentDate = new Date();
+          const daysSinceSignup = Math.ceil((currentDate.getTime() - signupDate.getTime()) / (1000 * 60 * 60 * 24));
 
           // Calculate longest streak from all sessions
           const longestStreak = Math.max(
@@ -80,34 +79,29 @@ const Analytics = () => {
             ...workoutSessions.map(session => session.streak_achieved)
           );
 
-          // Calculate overall completion rate
-          const totalPossibleDays = workoutSessions.reduce((total, session) => {
-            if (session.end_date) {
-              const startDate = new Date(session.start_date);
-              const endDate = new Date(session.end_date);
-              const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-              return total + daysDiff;
-            } else {
-              // Current session
-              return total + (profile.current_day - 1);
-            }
-          }, 0);
-
-          const completionRate = totalPossibleDays > 0 
-            ? (totalCompletedDays / totalPossibleDays) * 100 
-            : 0;
+          // Calculate completion rate for CURRENT routine only
+          let currentRoutineCompletionRate = 0;
+          const currentSession = workoutSessions.find(session => session.end_date === null);
+          
+          if (currentSession && profile.current_day > 1) {
+            // For current session: completed days / days since session started
+            const sessionStartDate = new Date(currentSession.start_date);
+            const daysSinceSessionStart = Math.ceil((currentDate.getTime() - sessionStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            const completedDays = profile.current_day - 1; // current_day is next day to complete
+            currentRoutineCompletionRate = Math.round((completedDays / Math.max(daysSinceSessionStart, 1)) * 100);
+          }
 
           // Add routine info to recent completions
           const completionsWithRoutine = completions?.map(completion => ({
             ...completion,
-            routine: 'Workout' // We could enhance this to show which routine was used
+            routine: profile.routine
           })) || [];
 
           setAnalytics({
-            totalDays: totalCompletedDays,
+            totalDays: daysSinceSignup,
             currentStreak: profile.streak,
             longestStreak,
-            completionRate: Math.round(completionRate),
+            completionRate: Math.min(currentRoutineCompletionRate, 100), // Cap at 100%
             recentCompletions: completionsWithRoutine,
             workoutSessions: workoutSessions || []
           });
@@ -154,7 +148,7 @@ const Analytics = () => {
             <CardContent className="p-4 text-center">
               <Calendar className="h-8 w-8 text-blue-500 mx-auto mb-2" />
               <p className="text-2xl font-bold text-gray-900">{analytics.totalDays}</p>
-              <p className="text-sm text-gray-600">Total Days</p>
+              <p className="text-sm text-gray-600">Days Since Signup</p>
             </CardContent>
           </Card>
 
@@ -170,7 +164,7 @@ const Analytics = () => {
             <CardContent className="p-4 text-center">
               <Target className="h-8 w-8 text-green-500 mx-auto mb-2" />
               <p className="text-2xl font-bold text-green-500">{analytics.completionRate}%</p>
-              <p className="text-sm text-gray-600">Completion Rate</p>
+              <p className="text-sm text-gray-600">Current Routine Rate</p>
             </CardContent>
           </Card>
 
