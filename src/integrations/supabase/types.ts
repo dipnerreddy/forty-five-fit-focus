@@ -39,6 +39,7 @@ export type Database = {
           id: string
           name: string
           routine: string
+          routine_changed_at: string | null
           streak: number
           updated_at: string
           user_id: string
@@ -52,6 +53,7 @@ export type Database = {
           id?: string
           name: string
           routine: string
+          routine_changed_at?: string | null
           streak?: number
           updated_at?: string
           user_id: string
@@ -65,6 +67,7 @@ export type Database = {
           id?: string
           name?: string
           routine?: string
+          routine_changed_at?: string | null
           streak?: number
           updated_at?: string
           user_id?: string
@@ -102,6 +105,42 @@ export type Database = {
           sets_completed?: number
           user_id?: string
           weight_used?: number | null
+        }
+        Relationships: []
+      }
+      workout_sessions: {
+        Row: {
+          created_at: string
+          days_completed: number
+          end_date: string | null
+          id: string
+          routine: string
+          start_date: string
+          streak_achieved: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_completed?: number
+          end_date?: string | null
+          id?: string
+          routine: string
+          start_date: string
+          streak_achieved?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_completed?: number
+          end_date?: string | null
+          id?: string
+          routine?: string
+          start_date?: string
+          streak_achieved?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

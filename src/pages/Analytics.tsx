@@ -14,6 +14,14 @@ interface AnalyticsData {
   recentCompletions: Array<{
     day: number;
     completed_at: string;
+    routine?: string;
+  }>;
+  workoutSessions: Array<{
+    routine: string;
+    start_date: string;
+    end_date: string | null;
+    days_completed: number;
+    streak_achieved: number;
   }>;
 }
 
@@ -25,7 +33,8 @@ const Analytics = () => {
     currentStreak: 0,
     longestStreak: 0,
     completionRate: 0,
-    recentCompletions: []
+    recentCompletions: [],
+    workoutSessions: []
   });
 
   useEffect(() => {
@@ -44,7 +53,14 @@ const Analytics = () => {
           .eq('user_id', session.user.id)
           .single();
 
-        // Fetch daily completions
+        // Fetch workout sessions (historical data)
+        const { data: workoutSessions } = await supabase
+          .from('workout_sessions')
+          .select('routine, start_date, end_date, days_completed, streak_achieved')
+          .eq('user_id', session.user.id)
+          .order('start_date', { ascending: false });
+
+        // Fetch daily completions with more details
         const { data: completions } = await supabase
           .from('daily_completions')
           .select('day, completed_at')
@@ -52,18 +68,48 @@ const Analytics = () => {
           .order('day', { ascending: false })
           .limit(10);
 
-        if (profile) {
-          const totalCompletedDays = completions?.length || 0;
-          const completionRate = profile.current_day > 1 
-            ? (totalCompletedDays / (profile.current_day - 1)) * 100 
+        if (profile && workoutSessions) {
+          // Calculate total days from all sessions
+          const totalCompletedDays = workoutSessions.reduce((total, session) => 
+            total + session.days_completed, 0
+          );
+
+          // Calculate longest streak from all sessions
+          const longestStreak = Math.max(
+            profile.streak, // current streak
+            ...workoutSessions.map(session => session.streak_achieved)
+          );
+
+          // Calculate overall completion rate
+          const totalPossibleDays = workoutSessions.reduce((total, session) => {
+            if (session.end_date) {
+              const startDate = new Date(session.start_date);
+              const endDate = new Date(session.end_date);
+              const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              return total + daysDiff;
+            } else {
+              // Current session
+              return total + (profile.current_day - 1);
+            }
+          }, 0);
+
+          const completionRate = totalPossibleDays > 0 
+            ? (totalCompletedDays / totalPossibleDays) * 100 
             : 0;
+
+          // Add routine info to recent completions
+          const completionsWithRoutine = completions?.map(completion => ({
+            ...completion,
+            routine: 'Workout' // We could enhance this to show which routine was used
+          })) || [];
 
           setAnalytics({
             totalDays: totalCompletedDays,
             currentStreak: profile.streak,
-            longestStreak: profile.streak, // For now, using current streak
+            longestStreak,
             completionRate: Math.round(completionRate),
-            recentCompletions: completions || []
+            recentCompletions: completionsWithRoutine,
+            workoutSessions: workoutSessions || []
           });
         }
       } catch (error) {
@@ -136,6 +182,45 @@ const Analytics = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Workout Sessions History */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Workout Sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {analytics.workoutSessions.length > 0 ? (
+              <div className="space-y-3">
+                {analytics.workoutSessions.map((session, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">{session.routine} Routine</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(session.start_date).toLocaleDateString()} 
+                        {session.end_date ? ` - ${new Date(session.end_date).toLocaleDateString()}` : ' - Present'}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {session.days_completed} days • {session.streak_achieved} streak
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {!session.end_date ? (
+                        <span className="text-green-500 text-sm font-medium">Active</span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Completed</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No workout sessions yet</p>
+                <p className="text-sm text-gray-400 mt-1">Start your first workout!</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Completions */}
         <Card className="border-0 shadow-sm">

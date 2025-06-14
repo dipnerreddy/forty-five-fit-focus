@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, User as UserIcon, Flame, Calendar, Target, Home, BarChart3, User, LogOut } from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Flame, Calendar, Target, Home, BarChart3, User, LogOut, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import RoutineSelector from '@/components/RoutineSelector';
 
 interface UserProfile {
   name: string;
@@ -21,6 +22,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showRoutineSelector, setShowRoutineSelector] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -62,6 +64,51 @@ const Profile = () => {
 
     fetchProfile();
   }, [navigate]);
+
+  const handleRoutineChange = async (newRoutine: 'Home' | 'Gym') => {
+    if (!profile) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ routine: newRoutine })
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        console.error('Error updating routine:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update routine. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setProfile(prev => prev ? {
+        ...prev,
+        routine: newRoutine,
+        current_day: 1,
+        streak: 0
+      } : null);
+
+      setShowRoutineSelector(false);
+
+      toast({
+        title: "Routine Changed! 🔄",
+        description: `Switched to ${newRoutine} routine. Your progress has been reset but your history is preserved.`
+      });
+    } catch (error) {
+      console.error('Error changing routine:', error);
+      toast({
+        title: "Error",
+        description: "Failed to change routine. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -155,6 +202,41 @@ const Profile = () => {
           </Card>
         </div>
 
+        {/* Routine Settings */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Workout Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Current Routine</p>
+                  <p className="text-sm text-gray-600">{profile.routine} Workout</p>
+                </div>
+                <Button
+                  onClick={() => setShowRoutineSelector(true)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Change Routine
+                </Button>
+              </div>
+              
+              {profile.current_day > 1 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-sm text-amber-800">
+                    <strong>Note:</strong> Changing your routine will reset your current progress (Day {profile.current_day} and {profile.streak} day streak), but your workout history will be preserved in stats.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Progress Overview */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
@@ -225,6 +307,15 @@ const Profile = () => {
           </button>
         </div>
       </div>
+
+      {/* Routine Selector Modal */}
+      {showRoutineSelector && (
+        <RoutineSelector
+          currentRoutine={profile.routine}
+          onSelect={handleRoutineChange}
+          onClose={() => setShowRoutineSelector(false)}
+        />
+      )}
     </div>
   );
 };
