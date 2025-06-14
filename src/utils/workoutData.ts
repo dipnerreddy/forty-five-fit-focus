@@ -3,12 +3,16 @@ export interface WorkoutExercise {
   name: string;
   sets: number;
   reps: string;
+  category: 'Main' | 'Core';
   weight?: number;
   notes?: string;
+  cardioNotes?: string;
 }
 
 export interface DayWorkout {
   day: number;
+  dayTitle: string;
+  dayFocus: string;
   exercises: WorkoutExercise[];
 }
 
@@ -21,8 +25,26 @@ function parseCSV(csvText: string): string[][] {
   
   for (const line of lines) {
     if (line.trim()) {
-      // Simple CSV parsing - handles basic cases
-      const row = line.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+      // Handle CSV parsing with proper quote handling
+      const row: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          row.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      
+      // Add the last field
+      row.push(current.trim());
       result.push(row);
     }
   }
@@ -48,18 +70,26 @@ export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWork
     const workoutPlan: DayWorkout[] = [];
     
     for (const row of dataRows) {
-      if (row.length >= 4) {
+      if (row.length >= 7) {
         const day = parseInt(row[0]);
-        const exerciseName = row[1];
-        const sets = parseInt(row[2]) || 4;
-        const reps = row[3] || '8';
-        const notes = row[4] || '';
+        const dayTitle = row[1] || '';
+        const dayFocus = row[2] || '';
+        const category = row[3] || 'Main';
+        const exerciseName = row[4] || '';
+        const sets = parseInt(row[5]) || 4;
+        const reps = row[6] || '8';
+        const cardioNotes = row[7] || '';
         
         if (!isNaN(day) && exerciseName) {
           // Find existing day or create new one
           let dayWorkout = workoutPlan.find(d => d.day === day);
           if (!dayWorkout) {
-            dayWorkout = { day, exercises: [] };
+            dayWorkout = { 
+              day, 
+              dayTitle,
+              dayFocus,
+              exercises: [] 
+            };
             workoutPlan.push(dayWorkout);
           }
           
@@ -67,7 +97,8 @@ export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWork
             name: exerciseName,
             sets,
             reps,
-            notes
+            category: category as 'Main' | 'Core',
+            cardioNotes
           });
         }
       }
@@ -85,16 +116,17 @@ function getFallbackWorkout(): DayWorkout[] {
   return [
     {
       day: 1,
+      dayTitle: "Push",
+      dayFocus: "Chest, Shoulders, Triceps",
       exercises: [
-        { name: "Push-ups", sets: 4, reps: "8" },
-        { name: "Squats", sets: 4, reps: "8" },
-        { name: "Plank Hold", sets: 4, reps: "30 sec" }
+        { name: "Push-ups", sets: 4, reps: "8", category: "Main" },
+        { name: "Squats", sets: 4, reps: "8", category: "Main" },
+        { name: "Plank Hold", sets: 4, reps: "30 sec", category: "Core" }
       ]
     }
   ];
 }
 
-export function getTodaysWorkout(workoutPlan: DayWorkout[], currentDay: number): WorkoutExercise[] {
-  const todaysPlan = workoutPlan.find(plan => plan.day === currentDay);
-  return todaysPlan?.exercises || [];
+export function getTodaysWorkout(workoutPlan: DayWorkout[], currentDay: number): DayWorkout | null {
+  return workoutPlan.find(plan => plan.day === currentDay) || null;
 }
