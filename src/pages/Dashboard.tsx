@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Home, Dumbbell, Flame, User, BarChart3 } from 'lucide-react';
+import { Home, Dumbbell, Flame, User, BarChart3, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -180,135 +180,165 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 space-y-6">
-      {/* Navigation */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Fitness Challenge</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-2"
+    <div className="min-h-screen bg-gray-50">
+      {/* Main Content */}
+      <div className="pb-20 px-4 pt-6 space-y-4">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Hi {user.name}
+          </h1>
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="outline" className="px-3 py-1">
+              Day {user.currentDay} of 45
+            </Badge>
+            <div className="flex items-center gap-1 text-orange-500">
+              <Flame className="h-4 w-4" />
+              <span className="font-semibold">{user.streak}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Card */}
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-orange-100 text-sm">Today's Progress</p>
+                <p className="text-2xl font-bold">{completedSets}/{totalSets}</p>
+              </div>
+              <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                {user.routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> : <Home className="h-4 w-4 mr-1" />}
+                {user.routine}
+              </Badge>
+            </div>
+            
+            <div className="w-full bg-white/20 rounded-full h-2">
+              <div 
+                className="bg-white h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(completedSets / totalSets) * 100}%` }}
+              />
+            </div>
+            <p className="text-orange-100 text-sm mt-2">
+              Sets completed
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Workout List */}
+        <div className="space-y-3">
+          {todaysWorkout.map((exercise, exerciseIndex) => (
+            <Card key={exerciseIndex} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-lg">{exercise.title}</h3>
+                  {user.routine === 'Gym' && (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        placeholder="kg"
+                        value={exercise.weight || ''}
+                        onChange={(e) => updateWeight(exerciseIndex, Number(e.target.value))}
+                        className="w-16 h-8 text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {exercise.sets.map((completed, setIndex) => (
+                    <div key={setIndex} className="flex items-center justify-center">
+                      <Checkbox
+                        checked={completed}
+                        onCheckedChange={(checked) => 
+                          updateSet(exerciseIndex, setIndex, checked as boolean)
+                        }
+                        className="w-6 h-6"
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">4 sets × 8 reps</div>
+                  <div className="flex justify-center space-x-1">
+                    {[1, 2, 3, 4].map((setNum) => (
+                      <div
+                        key={setNum}
+                        className={`w-2 h-2 rounded-full ${
+                          exercise.sets[setNum - 1] ? 'bg-orange-500' : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Complete Workout Button */}
+        <div className="px-4 py-6">
+          <Button
+            onClick={completeWorkout}
+            disabled={!isWorkoutComplete()}
+            className={`w-full h-14 text-lg font-semibold rounded-xl ${
+              isWorkoutComplete() 
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
           >
-            <User className="h-4 w-4" />
-            Profile
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/analytics')}
-            className="flex items-center gap-2"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Analytics
+            {isWorkoutComplete() ? (
+              <div className="flex items-center gap-2">
+                <Check className="h-5 w-5" />
+                Complete Workout
+              </div>
+            ) : (
+              '🔒 Complete All Sets'
+            )}
           </Button>
         </div>
+
+        {/* Daily Motivation */}
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-blue-800 font-medium text-sm">💪 Daily Motivation</p>
+              <p className="text-blue-700 italic mt-2 text-sm leading-relaxed">
+                "{dailyQuote}"
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Welcome Panel */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Hi {user.name}, Day {user.currentDay} of 45
-              </h1>
-              <div className="flex items-center gap-2 mt-2">
-                <Flame className="h-5 w-5 text-orange-500" />
-                <span className="text-lg font-semibold text-orange-500">
-                  {user.streak} day streak
-                </span>
-              </div>
-            </div>
-            <Badge variant="secondary" className="flex items-center gap-2 px-3 py-2">
-              {user.routine === 'Gym' ? <Dumbbell className="h-4 w-4" /> : <Home className="h-4 w-4" />}
-              {user.routine}
-            </Badge>
-          </div>
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+        <div className="flex justify-around items-center">
+          <button 
+            className="flex flex-col items-center py-2 px-4 text-orange-500"
+          >
+            <Home className="h-6 w-6" />
+            <span className="text-xs mt-1 font-medium">Workout</span>
+          </button>
           
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div 
-              className="bg-orange-500 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${(completedSets / totalSets) * 100}%` }}
-            />
-          </div>
-          <p className="text-sm text-gray-600 mt-2">
-            {completedSets}/{totalSets} sets completed today
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Today's Workout */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold">Today's Workout</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {todaysWorkout.map((exercise, exerciseIndex) => (
-            <div key={exerciseIndex} className="border rounded-lg p-4 bg-white">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">{exercise.title}</h3>
-                {user.routine === 'Gym' && (
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Weight"
-                      value={exercise.weight || ''}
-                      onChange={(e) => updateWeight(exerciseIndex, Number(e.target.value))}
-                      className="w-20 h-8"
-                    />
-                    <span className="text-sm text-gray-500">kg</span>
-                  </div>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-4 gap-3">
-                {exercise.sets.map((completed, setIndex) => (
-                  <div key={setIndex} className="flex items-center space-x-2 p-2 rounded border">
-                    <Checkbox
-                      checked={completed}
-                      onCheckedChange={(checked) => 
-                        updateSet(exerciseIndex, setIndex, checked as boolean)
-                      }
-                    />
-                    <label className="text-sm font-medium">
-                      Set {setIndex + 1}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-3 text-xs text-gray-500">
-                4 sets × 8 reps
-              </div>
-            </div>
-          ))}
+          <button 
+            onClick={() => navigate('/analytics')}
+            className="flex flex-col items-center py-2 px-4 text-gray-400 hover:text-gray-600"
+          >
+            <BarChart3 className="h-6 w-6" />
+            <span className="text-xs mt-1">Stats</span>
+          </button>
           
-          {/* Complete Workout Button */}
-          <div className="flex justify-center mt-6">
-            <Button
-              onClick={completeWorkout}
-              disabled={!isWorkoutComplete()}
-              className={`px-8 py-3 text-lg font-semibold ${
-                isWorkoutComplete() 
-                  ? 'bg-green-500 hover:bg-green-600 text-white' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {isWorkoutComplete() ? '🎉 Complete Workout' : '🔒 Complete All Sets to Unlock'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Daily Motivation */}
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-50 to-orange-100">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-lg mb-3 text-orange-800">💬 Daily Motivation</h3>
-          <p className="text-orange-700 italic leading-relaxed">
-            "{dailyQuote}"
-          </p>
-        </CardContent>
-      </Card>
+          <button 
+            onClick={() => navigate('/profile')}
+            className="flex flex-col items-center py-2 px-4 text-gray-400 hover:text-gray-600"
+          >
+            <User className="h-6 w-6" />
+            <span className="text-xs mt-1">Profile</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
