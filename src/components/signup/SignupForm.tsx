@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -146,46 +145,40 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-        <CardContent className="p-6">
-          <form onSubmit={handleSignup} className="space-y-6">
-            <PersonalInfoSection 
-              formData={formData}
-              onInputChange={handleInputChange}
-              isLoading={isLoading}
-            />
-            
-            <PhysicalDetailsSection 
-              formData={formData}
-              onInputChange={handleInputChange}
-              isLoading={isLoading}
-            />
-            
-            <WorkoutStyleSection 
-              formData={formData}
-              onInputChange={handleInputChange}
-              isLoading={isLoading}
-            />
-            
-            <Button 
-              type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating Account...
-                </div>
-              ) : (
-                "🚀 Start My 45-Day Challenge"
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <form onSubmit={handleSignup} className="space-y-6">
+      <PersonalInfoSection 
+        formData={formData}
+        onInputChange={handleInputChange}
+        isLoading={isLoading}
+      />
+      
+      <PhysicalDetailsSection 
+        formData={formData}
+        onInputChange={handleInputChange}
+        isLoading={isLoading}
+      />
+      
+      <WorkoutStyleSection 
+        formData={formData}
+        onInputChange={handleInputChange}
+        isLoading={isLoading}
+      />
+      
+      <Button 
+        type="submit" 
+        className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Creating Account...
+          </div>
+        ) : (
+          "🚀 Start My 45-Day Challenge"
+        )}
+      </Button>
+    </form>
   );
 };
 

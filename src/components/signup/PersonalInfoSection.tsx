@@ -16,11 +16,6 @@ interface PersonalInfoSectionProps {
 const PersonalInfoSection = ({ formData, onInputChange, isLoading }: PersonalInfoSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Personal Info</h3>
-        <div className="w-12 h-0.5 bg-orange-500 mx-auto"></div>
-      </div>
-      
       <div className="space-y-2">
         <Label htmlFor="name" className="text-sm font-medium text-gray-700">
           Full Name
@@ -32,7 +27,7 @@ const PersonalInfoSection = ({ formData, onInputChange, isLoading }: PersonalInf
           placeholder="Enter your full name"
           required
           disabled={isLoading}
-          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
         />
       </div>
       
@@ -48,7 +43,7 @@ const PersonalInfoSection = ({ formData, onInputChange, isLoading }: PersonalInf
           placeholder="Enter your email"
           required
           disabled={isLoading}
-          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
         />
       </div>
       
@@ -64,7 +59,7 @@ const PersonalInfoSection = ({ formData, onInputChange, isLoading }: PersonalInf
           placeholder="Minimum 8 characters"
           required
           disabled={isLoading}
-          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
         />
       </div>
     </div>

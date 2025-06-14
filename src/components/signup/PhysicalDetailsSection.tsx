@@ -17,11 +17,6 @@ interface PhysicalDetailsSectionProps {
 const PhysicalDetailsSection = ({ formData, onInputChange, isLoading }: PhysicalDetailsSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Physical Details</h3>
-        <div className="w-12 h-0.5 bg-orange-500 mx-auto"></div>
-      </div>
-      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">
@@ -35,7 +30,7 @@ const PhysicalDetailsSection = ({ formData, onInputChange, isLoading }: Physical
             required
             disabled={isLoading}
             max={new Date().toISOString().split('T')[0]}
-            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
           />
         </div>
         
@@ -52,7 +47,7 @@ const PhysicalDetailsSection = ({ formData, onInputChange, isLoading }: Physical
             min="31"
             required
             disabled={isLoading}
-            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+            className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
           />
         </div>
       </div>
