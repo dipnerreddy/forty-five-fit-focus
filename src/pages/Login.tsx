@@ -1,24 +1,38 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -31,14 +45,54 @@ const Login = () => {
       return;
     }
 
-    // Simulate login - replace with actual auth logic
-    toast({
-      title: "Welcome back!",
-      description: "Your journey continues."
-    });
-    
-    // Redirect to dashboard (would use router in real app)
-    window.location.href = '/dashboard';
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please check your credentials and try again.",
+            variant: "destructive"
+          });
+        } else if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "Email Not Verified",
+            description: "Please check your email and click the verification link before signing in.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login Error",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: "Welcome back!",
+        description: "Your journey continues."
+      });
+      
+      // Navigate to dashboard on successful login
+      navigate('/dashboard');
+      
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,6 +113,7 @@ const Login = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Enter your email"
                 required
+                disabled={isLoading}
               />
             </div>
             
@@ -71,11 +126,16 @@ const Login = () => {
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 placeholder="Enter your password"
                 required
+                disabled={isLoading}
               />
             </div>
             
-            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-              Sign In
+            <Button 
+              type="submit" 
+              className="w-full bg-orange-500 hover:bg-orange-600"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
           
