@@ -36,6 +36,7 @@ export type Database = {
           created_at: string
           current_day: number
           gender: string | null
+          has_seen_tutorial: boolean | null
           id: string
           name: string
           routine: string
@@ -50,6 +51,7 @@ export type Database = {
           created_at?: string
           current_day?: number
           gender?: string | null
+          has_seen_tutorial?: boolean | null
           id?: string
           name: string
           routine: string
@@ -64,6 +66,7 @@ export type Database = {
           created_at?: string
           current_day?: number
           gender?: string | null
+          has_seen_tutorial?: boolean | null
           id?: string
           name?: string
           routine?: string

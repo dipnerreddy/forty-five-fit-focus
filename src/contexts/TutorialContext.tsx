@@ -94,7 +94,7 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from('profiles')
         .select('has_seen_tutorial')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (profile && !profile.has_seen_tutorial) {
         // First time user - show tutorial after a brief delay
