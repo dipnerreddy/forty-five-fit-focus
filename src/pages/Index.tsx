@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -16,7 +17,9 @@ import {
   CheckCircle,
   ArrowRight,
   Zap,
-  Award
+  Award,
+  Heart,
+  Mail
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
@@ -364,15 +367,15 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Challenge Rules - Enhanced */}
+      {/* Challenge Rules - Enhanced with Better Contrast */}
       <div className="py-16 sm:py-24 bg-gradient-to-r from-gray-900 to-black text-white">
         <div className="max-w-4xl mx-auto px-4">
-          <Card className="border-4 border-orange-500 bg-gradient-to-br from-orange-900/20 to-red-900/20 backdrop-blur-sm shadow-2xl">
+          <Card className="border-4 border-orange-500 bg-gradient-to-br from-gray-800/90 to-gray-900/90 backdrop-blur-sm shadow-2xl">
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <h3 className="font-black text-2xl sm:text-3xl text-orange-400 mb-4">The Sacred Rules</h3>
                 <div className="w-20 h-1 bg-gradient-to-r from-orange-400 to-red-400 mx-auto rounded-full"></div>
-                <p className="text-gray-300 mt-4 text-lg">Break any rule, start over. No negotiations.</p>
+                <p className="text-gray-200 mt-4 text-lg">Break any rule, start over. No negotiations.</p>
               </div>
               
               <div className="space-y-6">
@@ -387,7 +390,7 @@ const Index = () => {
                     <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <span className="text-white font-bold text-sm">{index + 1}</span>
                     </div>
-                    <span className="text-gray-200 text-lg leading-relaxed group-hover:text-white transition-colors">
+                    <span className="text-gray-100 text-lg leading-relaxed group-hover:text-white transition-colors">
                       {rule}
                     </span>
                   </div>
@@ -422,6 +425,79 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Brand Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Flame className="h-8 w-8 text-orange-500" />
+                <span className="text-2xl font-black">45-Day Challenge</span>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Transform your life through the power of consistency. One day at a time, one rep at a time.
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Heart className="h-4 w-4 text-red-500" />
+                <span>Made with dedication for serious challengers</span>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-orange-400">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link to="/signup" className="text-gray-400 hover:text-white transition-colors">
+                    Start Challenge
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="text-gray-400 hover:text-white transition-colors">
+                    Continue Journey
+                  </Link>
+                </li>
+                <li>
+                  <a href="#features" className="text-gray-400 hover:text-white transition-colors">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">
+                    Success Stories
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-orange-400">Get in Touch</h4>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Mail className="h-4 w-4" />
+                <span>support@45daychallenge.com</span>
+              </div>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Questions about the challenge? Need technical support? We're here to help you succeed.
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-gray-400">
+              © 2024 45-Day Challenge. All rights reserved.
+            </div>
+            <div className="flex gap-6 text-xs text-gray-500">
+              <a href="#privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</a>
+              <a href="#terms" className="hover:text-gray-400 transition-colors">Terms of Service</a>
+              <a href="#cookies" className="hover:text-gray-400 transition-colors">Cookie Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
