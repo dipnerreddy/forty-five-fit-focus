@@ -9,11 +9,13 @@ import { Home, Dumbbell, Flame, User, BarChart3, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchWorkoutPlan, getTodaysWorkout, WorkoutExercise } from '@/utils/workoutData';
 
 interface Exercise {
   title: string;
   weight?: number;
   sets: boolean[];
+  reps?: string;
 }
 
 interface User {
@@ -33,17 +35,10 @@ const Dashboard = () => {
     routine: 'Home'
   });
   const [isLoading, setIsLoading] = useState(true);
-
-  const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([
-    { title: "Push-ups", sets: [false, false, false, false] },
-    { title: "Squats", weight: 60, sets: [false, false, false, false] },
-    { title: "Deadlifts", weight: 80, sets: [false, false, false, false] },
-    { title: "Plank Hold", sets: [false, false, false, false] }
-  ]);
-
+  const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
 
-  // Fetch user profile data
+  // Fetch user profile data and workout plan
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -65,12 +60,27 @@ const Dashboard = () => {
         }
 
         if (profile) {
-          setUser({
+          const userData = {
             name: profile.name,
             currentDay: profile.current_day,
             streak: profile.streak,
             routine: profile.routine as 'Home' | 'Gym'
-          });
+          };
+          setUser(userData);
+          
+          // Fetch workout plan based on routine
+          const workoutPlan = await fetchWorkoutPlan(userData.routine);
+          const todaysExercises = getTodaysWorkout(workoutPlan, userData.currentDay);
+          
+          // Convert to local exercise format
+          const exercises: Exercise[] = todaysExercises.map(exercise => ({
+            title: exercise.name,
+            sets: new Array(exercise.sets).fill(false),
+            reps: exercise.reps,
+            weight: userData.routine === 'Gym' ? 0 : undefined
+          }));
+          
+          setTodaysWorkout(exercises);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -169,7 +179,7 @@ const Dashboard = () => {
   const completedSets = todaysWorkout.reduce((total, exercise) => 
     total + exercise.sets.filter(set => set).length, 0
   );
-  const totalSets = todaysWorkout.length * 4;
+  const totalSets = todaysWorkout.reduce((total, exercise) => total + exercise.sets.length, 0);
 
   if (isLoading) {
     return (
@@ -216,7 +226,7 @@ const Dashboard = () => {
             <div className="w-full bg-white/20 rounded-full h-2">
               <div 
                 className="bg-white h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(completedSets / totalSets) * 100}%` }}
+                style={{ width: totalSets > 0 ? `${(completedSets / totalSets) * 100}%` : '0%' }}
               />
             </div>
             <p className="text-orange-100 text-sm mt-2">
@@ -227,77 +237,88 @@ const Dashboard = () => {
 
         {/* Workout List */}
         <div className="space-y-3">
-          {todaysWorkout.map((exercise, exerciseIndex) => (
-            <Card key={exerciseIndex} className="border-0 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{exercise.title}</h3>
-                  {user.routine === 'Gym' && (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        placeholder="kg"
-                        value={exercise.weight || ''}
-                        onChange={(e) => updateWeight(exerciseIndex, Number(e.target.value))}
-                        className="w-16 h-8 text-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                  {exercise.sets.map((completed, setIndex) => (
-                    <div key={setIndex} className="flex items-center justify-center">
-                      <Checkbox
-                        checked={completed}
-                        onCheckedChange={(checked) => 
-                          updateSet(exerciseIndex, setIndex, checked as boolean)
-                        }
-                        className="w-6 h-6"
-                      />
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">4 sets × 8 reps</div>
-                  <div className="flex justify-center space-x-1">
-                    {[1, 2, 3, 4].map((setNum) => (
-                      <div
-                        key={setNum}
-                        className={`w-2 h-2 rounded-full ${
-                          exercise.sets[setNum - 1] ? 'bg-orange-500' : 'bg-gray-200'
-                        }`}
-                      />
+          {todaysWorkout.length > 0 ? (
+            todaysWorkout.map((exercise, exerciseIndex) => (
+              <Card key={exerciseIndex} className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-lg">{exercise.title}</h3>
+                    {user.routine === 'Gym' && (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          placeholder="kg"
+                          value={exercise.weight || ''}
+                          onChange={(e) => updateWeight(exerciseIndex, Number(e.target.value))}
+                          className="w-16 h-8 text-sm"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    {exercise.sets.map((completed, setIndex) => (
+                      <div key={setIndex} className="flex items-center justify-center">
+                        <Checkbox
+                          checked={completed}
+                          onCheckedChange={(checked) => 
+                            updateSet(exerciseIndex, setIndex, checked as boolean)
+                          }
+                          className="w-6 h-6"
+                        />
+                      </div>
                     ))}
                   </div>
-                </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 mb-1">{exercise.sets.length} sets × {exercise.reps}</div>
+                    <div className="flex justify-center space-x-1">
+                      {exercise.sets.map((completed, setIndex) => (
+                        <div
+                          key={setIndex}
+                          className={`w-2 h-2 rounded-full ${
+                            completed ? 'bg-orange-500' : 'bg-gray-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-8 text-center">
+                <p className="text-gray-500">No workout scheduled for today</p>
+                <p className="text-sm text-gray-400 mt-1">Take a rest day or check back tomorrow!</p>
               </CardContent>
             </Card>
-          ))}
+          )}
         </div>
 
         {/* Complete Workout Button */}
-        <div className="px-4 py-6">
-          <Button
-            onClick={completeWorkout}
-            disabled={!isWorkoutComplete()}
-            className={`w-full h-14 text-lg font-semibold rounded-xl ${
-              isWorkoutComplete() 
-                ? 'bg-green-500 hover:bg-green-600 text-white' 
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            {isWorkoutComplete() ? (
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5" />
-                Complete Workout
-              </div>
-            ) : (
-              '🔒 Complete All Sets'
-            )}
-          </Button>
-        </div>
+        {todaysWorkout.length > 0 && (
+          <div className="px-4 py-6">
+            <Button
+              onClick={completeWorkout}
+              disabled={!isWorkoutComplete()}
+              className={`w-full h-14 text-lg font-semibold rounded-xl ${
+                isWorkoutComplete() 
+                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {isWorkoutComplete() ? (
+                <div className="flex items-center gap-2">
+                  <Check className="h-5 w-5" />
+                  Complete Workout
+                </div>
+              ) : (
+                '🔒 Complete All Sets'
+              )}
+            </Button>
+          </div>
+        )}
 
         {/* Daily Motivation */}
         <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50">
