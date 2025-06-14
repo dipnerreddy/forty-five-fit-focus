@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +14,7 @@ import CurrentExerciseCard from '@/components/dashboard/CurrentExerciseCard';
 import CompleteWorkoutButton from '@/components/dashboard/CompleteWorkoutButton';
 import MotivationCard from '@/components/dashboard/MotivationCard';
 import BottomNavigation from '@/components/dashboard/BottomNavigation';
+import CompletionReviewForm from '@/components/dashboard/CompletionReviewForm';
 
 interface Exercise {
   title: string;
@@ -44,6 +44,8 @@ const Dashboard = () => {
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<{ dayTitle: string; dayFocus: string; cardioNotes?: string } | null>(null);
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [hasCompletedChallenge, setHasCompletedChallenge] = useState(false);
 
   // Fetch user profile data and workout plan
   useEffect(() => {
@@ -74,6 +76,20 @@ const Dashboard = () => {
             routine: profile.routine as 'Home' | 'Gym'
           };
           setUser(userData);
+          
+          // Check if user has completed the challenge and hasn't submitted a review yet
+          if (userData.streak >= 45) {
+            const { data: existingReview } = await supabase
+              .from('user_reviews')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .single();
+            
+            if (!existingReview) {
+              setHasCompletedChallenge(true);
+              setShowReviewForm(true);
+            }
+          }
           
           // Fetch workout plan based on routine
           const workoutPlan = await fetchWorkoutPlan(userData.routine);
@@ -158,12 +174,15 @@ const Dashboard = () => {
         return;
       }
 
+      const newStreak = user.streak + 1;
+      const newCurrentDay = user.currentDay + 1;
+
       // Update user progress
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          current_day: user.currentDay + 1,
-          streak: user.streak + 1
+          current_day: newCurrentDay,
+          streak: newStreak
         })
         .eq('user_id', session.user.id);
 
@@ -175,9 +194,15 @@ const Dashboard = () => {
       // Update local state
       setUser(prev => ({
         ...prev,
-        currentDay: prev.currentDay + 1,
-        streak: prev.streak + 1
+        currentDay: newCurrentDay,
+        streak: newStreak
       }));
+
+      // Check if user just completed the 45-day challenge
+      if (newStreak === 45 && !hasCompletedChallenge) {
+        setHasCompletedChallenge(true);
+        setShowReviewForm(true);
+      }
 
       toast({
         title: "Workout Complete! 🎉",
@@ -237,6 +262,14 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Review Form Modal */}
+      {showReviewForm && (
+        <CompletionReviewForm
+          userName={user.name}
+          onClose={() => setShowReviewForm(false)}
+        />
+      )}
+
       {/* Main Content */}
       <div className="pb-20 px-4 pt-6 space-y-4">
         {/* Header */}
