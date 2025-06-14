@@ -6,7 +6,6 @@ export interface WorkoutExercise {
   category: 'Main' | 'Core';
   weight?: number;
   notes?: string;
-  cardioNotes?: string;
 }
 
 export interface DayWorkout {
@@ -14,6 +13,7 @@ export interface DayWorkout {
   dayTitle: string;
   dayFocus: string;
   exercises: WorkoutExercise[];
+  cardioNotes?: string; // Single cardio note for the entire day
 }
 
 const HOME_WORKOUT_PLAN_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqDM3PdzUcbRIEKFoga2kmigtYQpN5Fi7UNYch9cckwDcOjR818y6hdTKsGS8K7aOzvzWQmqcpT9Hh/pub?output=csv";
@@ -88,17 +88,22 @@ export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWork
               day, 
               dayTitle,
               dayFocus,
-              exercises: [] 
+              exercises: [],
+              cardioNotes: cardioNotes || undefined // Only set if there's content
             };
             workoutPlan.push(dayWorkout);
+          }
+          
+          // If this row has cardio notes and the day doesn't have any yet, set it
+          if (cardioNotes && !dayWorkout.cardioNotes) {
+            dayWorkout.cardioNotes = cardioNotes;
           }
           
           dayWorkout.exercises.push({
             name: exerciseName,
             sets,
             reps,
-            category: category as 'Main' | 'Core',
-            cardioNotes
+            category: category as 'Main' | 'Core'
           });
         }
       }
@@ -122,7 +127,8 @@ function getFallbackWorkout(): DayWorkout[] {
         { name: "Push-ups", sets: 4, reps: "8", category: "Main" },
         { name: "Squats", sets: 4, reps: "8", category: "Main" },
         { name: "Plank Hold", sets: 4, reps: "30 sec", category: "Core" }
-      ]
+      ],
+      cardioNotes: "15 min moderate cardio warm-up"
     }
   ];
 }

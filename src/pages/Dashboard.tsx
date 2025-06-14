@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Home, Dumbbell, Flame, User, BarChart3, Check, Target, Zap } from 'lucide-react';
+import { Home, Dumbbell, Flame, User, BarChart3, Check, Target, Zap, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +16,6 @@ interface Exercise {
   sets: boolean[];
   reps?: string;
   category: 'Main' | 'Core';
-  cardioNotes?: string;
 }
 
 interface User {
@@ -37,7 +36,7 @@ const Dashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
-  const [workoutDetails, setWorkoutDetails] = useState<{ dayTitle: string; dayFocus: string } | null>(null);
+  const [workoutDetails, setWorkoutDetails] = useState<{ dayTitle: string; dayFocus: string; cardioNotes?: string } | null>(null);
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
 
   // Fetch user profile data and workout plan
@@ -75,10 +74,11 @@ const Dashboard = () => {
           const todaysWorkoutData = getTodaysWorkout(workoutPlan, userData.currentDay);
           
           if (todaysWorkoutData) {
-            // Set workout details
+            // Set workout details including cardio notes
             setWorkoutDetails({
               dayTitle: todaysWorkoutData.dayTitle,
-              dayFocus: todaysWorkoutData.dayFocus
+              dayFocus: todaysWorkoutData.dayFocus,
+              cardioNotes: todaysWorkoutData.cardioNotes
             });
 
             // Convert to local exercise format
@@ -87,7 +87,6 @@ const Dashboard = () => {
               sets: new Array(exercise.sets).fill(false),
               reps: exercise.reps,
               category: exercise.category,
-              cardioNotes: exercise.cardioNotes,
               weight: userData.routine === 'Gym' ? 0 : undefined
             }));
             
@@ -270,6 +269,21 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Cardio/Notes Card */}
+        {workoutDetails?.cardioNotes && (
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-l-green-500">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="h-5 w-5 text-green-600" />
+                <h3 className="font-semibold text-green-800">Cardio / Notes</h3>
+              </div>
+              <p className="text-green-700 text-sm leading-relaxed whitespace-pre-line">
+                {workoutDetails.cardioNotes}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Exercises */}
         {mainExercises.length > 0 && (
           <div className="space-y-3">
@@ -324,14 +338,6 @@ const Dashboard = () => {
                         ))}
                       </div>
                     </div>
-
-                    {exercise.cardioNotes && (
-                      <div className="mt-3 p-2 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-700">
-                          <strong>Cardio/Notes:</strong> {exercise.cardioNotes}
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -382,14 +388,6 @@ const Dashboard = () => {
                         ))}
                       </div>
                     </div>
-
-                    {exercise.cardioNotes && (
-                      <div className="mt-3 p-2 bg-purple-50 rounded-lg">
-                        <p className="text-xs text-purple-700">
-                          <strong>Cardio/Notes:</strong> {exercise.cardioNotes}
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
