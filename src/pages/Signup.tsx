@@ -6,10 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const Signup = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -68,19 +71,63 @@ const Signup = () => {
     return true;
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
-    // Simulate signup - replace with actual auth logic
-    toast({
-      title: "Welcome to the Challenge!",
-      description: "Begin your transformation in just 45 days."
-    });
+    setIsLoading(true);
     
-    // Redirect to dashboard (would use router in real app)
-    window.location.href = '/dashboard';
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            name: formData.name,
+            age: formData.age,
+            gender: formData.gender,
+            weight: formData.weight,
+            routine: formData.routine
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "Account Already Exists",
+            description: "This email is already registered. Please sign in instead.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Signup Error",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      toast({
+        title: "Welcome to the Challenge!",
+        description: "Please check your email to verify your account, then you can start your 45-day transformation journey!"
+      });
+
+      // Redirect to login page
+      navigate('/login');
+      
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -100,6 +147,7 @@ const Signup = () => {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Enter your name"
                 required
+                disabled={isLoading}
               />
             </div>
             
@@ -112,6 +160,7 @@ const Signup = () => {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Enter your email"
                 required
+                disabled={isLoading}
               />
             </div>
             
@@ -124,6 +173,7 @@ const Signup = () => {
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 placeholder="Minimum 8 characters"
                 required
+                disabled={isLoading}
               />
             </div>
             
@@ -139,6 +189,7 @@ const Signup = () => {
                   min="13"
                   max="80"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
@@ -152,13 +203,18 @@ const Signup = () => {
                   placeholder="> 30"
                   min="31"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="gender">Gender</Label>
-              <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+              <Select 
+                value={formData.gender} 
+                onValueChange={(value) => handleInputChange('gender', value)}
+                disabled={isLoading}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
@@ -172,7 +228,11 @@ const Signup = () => {
             
             <div className="space-y-2">
               <Label htmlFor="routine">Workout Routine</Label>
-              <Select value={formData.routine} onValueChange={(value) => handleInputChange('routine', value)}>
+              <Select 
+                value={formData.routine} 
+                onValueChange={(value) => handleInputChange('routine', value)}
+                disabled={isLoading}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Choose your routine" />
                 </SelectTrigger>
@@ -189,8 +249,12 @@ const Signup = () => {
               </p>
             </div>
             
-            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
-              Start Challenge
+            <Button 
+              type="submit" 
+              className="w-full bg-orange-500 hover:bg-orange-600"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating Account..." : "Start Challenge"}
             </Button>
           </form>
           

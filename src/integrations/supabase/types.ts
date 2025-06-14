@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      daily_completions: {
+        Row: {
+          completed_at: string
+          day: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          day: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          day?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number
+          created_at: string
+          current_day: number
+          gender: string | null
+          id: string
+          name: string
+          routine: string
+          streak: number
+          updated_at: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          current_day?: number
+          gender?: string | null
+          id?: string
+          name: string
+          routine: string
+          streak?: number
+          updated_at?: string
+          user_id: string
+          weight: number
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          current_day?: number
+          gender?: string | null
+          id?: string
+          name?: string
+          routine?: string
+          streak?: number
+          updated_at?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      workout_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          day: number
+          exercise_name: string
+          id: string
+          sets_completed: number
+          user_id: string
+          weight_used: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          day: number
+          exercise_name: string
+          id?: string
+          sets_completed?: number
+          user_id: string
+          weight_used?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          day?: number
+          exercise_name?: string
+          id?: string
+          sets_completed?: number
+          user_id?: string
+          weight_used?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
