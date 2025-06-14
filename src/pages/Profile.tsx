@@ -6,6 +6,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, User as UserIcon, Flame, Calendar, Target, Home, BarChart3, User, LogOut, Settings, Award, Lock, Unlock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import RoutineSelector from '@/components/RoutineSelector';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface UserProfile {
   name: string;
@@ -287,13 +298,41 @@ const Profile = () => {
                   <p className="font-medium">Current Routine</p>
                   <p className="text-sm text-gray-600">{profile.routine} Workout</p>
                 </div>
-                <Button
-                  onClick={() => setShowRoutineSelector(true)}
-                  variant="outline"
-                  size="sm"
-                >
-                  Change Routine
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                    >
+                      Change Routine
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Change Workout Routine?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {profile.current_day > 1 ? (
+                          <>
+                            This will reset your current progress (Day {profile.current_day} and {profile.streak} day streak) and start you from Day 1. Your workout history will be preserved in stats.
+                          </>
+                        ) : (
+                          <>
+                            This will change your workout routine. You can switch between Home and Gym workouts at any time.
+                          </>
+                        )}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => setShowRoutineSelector(true)}
+                        className="bg-orange-500 hover:bg-orange-600"
+                      >
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
               
               {profile.current_day > 1 && (
