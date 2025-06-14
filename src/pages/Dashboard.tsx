@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { fetchWorkoutPlan, getTodaysWorkout } from '@/utils/workoutData';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useWorkoutCompletion } from '@/hooks/useWorkoutCompletion';
 
-// Import new components
+// Import components
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import ProgressCard from '@/components/dashboard/ProgressCard';
 import WorkoutDetailsCard from '@/components/dashboard/WorkoutDetailsCard';
@@ -24,106 +25,63 @@ interface Exercise {
   category: 'Main' | 'Core';
 }
 
-interface User {
-  name: string;
-  currentDay: number;
-  streak: number;
-  routine: 'Home' | 'Gym';
-}
-
 const Dashboard = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [user, setUser] = useState<User>({
-    name: "Loading...",
-    currentDay: 1,
-    streak: 0,
-    routine: 'Home'
+  const {
+    user,
+    setUser,
+    isLoading,
+    hasCompletedChallenge,
+    setHasCompletedChallenge,
+    showReviewForm,
+    setShowReviewForm
+  } = useUserProfile();
+
+  const { completeWorkout: handleCompleteWorkout } = useWorkoutCompletion({
+    user,
+    setUser,
+    hasCompletedChallenge,
+    setHasCompletedChallenge,
+    setShowReviewForm
   });
-  const [isLoading, setIsLoading] = useState(true);
+
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<{ dayTitle: string; dayFocus: string; cardioNotes?: string } | null>(null);
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [hasCompletedChallenge, setHasCompletedChallenge] = useState(false);
 
-  // Fetch user profile data and workout plan
+  // Fetch workout plan
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const loadWorkoutData = async () => {
+      if (user.name === "Loading...") return;
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          navigate('/login');
-          return;
-        }
+        const workoutPlan = await fetchWorkoutPlan(user.routine);
+        const todaysWorkoutData = getTodaysWorkout(workoutPlan, user.currentDay);
+        
+        if (todaysWorkoutData) {
+          setWorkoutDetails({
+            dayTitle: todaysWorkoutData.dayTitle,
+            dayFocus: todaysWorkoutData.dayFocus,
+            cardioNotes: todaysWorkoutData.cardioNotes
+          });
 
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('name, current_day, streak, routine')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        if (profile) {
-          const userData = {
-            name: profile.name,
-            currentDay: profile.current_day,
-            streak: profile.streak,
-            routine: profile.routine as 'Home' | 'Gym'
-          };
-          setUser(userData);
+          const exercises: Exercise[] = todaysWorkoutData.exercises.map(exercise => ({
+            title: exercise.name,
+            sets: new Array(exercise.sets).fill(false),
+            reps: exercise.reps,
+            category: exercise.category,
+            weight: user.routine === 'Gym' ? 0 : undefined
+          }));
           
-          // Check if user has completed the challenge and hasn't submitted a review yet
-          if (userData.streak >= 45) {
-            const { data: existingReview } = await supabase
-              .from('user_reviews')
-              .select('id')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            if (!existingReview) {
-              setHasCompletedChallenge(true);
-              setShowReviewForm(true);
-            }
-          }
-          
-          // Fetch workout plan based on routine
-          const workoutPlan = await fetchWorkoutPlan(userData.routine);
-          const todaysWorkoutData = getTodaysWorkout(workoutPlan, userData.currentDay);
-          
-          if (todaysWorkoutData) {
-            // Set workout details including cardio notes
-            setWorkoutDetails({
-              dayTitle: todaysWorkoutData.dayTitle,
-              dayFocus: todaysWorkoutData.dayFocus,
-              cardioNotes: todaysWorkoutData.cardioNotes
-            });
-
-            // Convert to local exercise format
-            const exercises: Exercise[] = todaysWorkoutData.exercises.map(exercise => ({
-              title: exercise.name,
-              sets: new Array(exercise.sets).fill(false),
-              reps: exercise.reps,
-              category: exercise.category,
-              weight: userData.routine === 'Gym' ? 0 : undefined
-            }));
-            
-            setTodaysWorkout(exercises);
-          }
+          setTodaysWorkout(exercises);
         }
       } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading workout data:', error);
       }
     };
 
-    fetchUserProfile();
-  }, [navigate]);
+    loadWorkoutData();
+  }, [user.routine, user.currentDay, user.name]);
 
   const updateSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
     setTodaysWorkout(prev => {
@@ -157,65 +115,7 @@ const Dashboard = () => {
       return;
     }
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Record daily completion
-      const { error: completionError } = await supabase
-        .from('daily_completions')
-        .insert({
-          user_id: session.user.id,
-          day: user.currentDay
-        });
-
-      if (completionError && !completionError.message.includes('duplicate')) {
-        console.error('Error recording completion:', completionError);
-        return;
-      }
-
-      const newStreak = user.streak + 1;
-      const newCurrentDay = user.currentDay + 1;
-
-      // Update user progress
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          current_day: newCurrentDay,
-          streak: newStreak
-        })
-        .eq('user_id', session.user.id);
-
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        return;
-      }
-
-      // Update local state
-      setUser(prev => ({
-        ...prev,
-        currentDay: newCurrentDay,
-        streak: newStreak
-      }));
-
-      // Check if user just completed the 45-day challenge
-      if (newStreak === 45 && !hasCompletedChallenge) {
-        setHasCompletedChallenge(true);
-        setShowReviewForm(true);
-      }
-
-      toast({
-        title: "Workout Complete! 🎉",
-        description: `Day ${user.currentDay} conquered! Keep the streak alive!`
-      });
-    } catch (error) {
-      console.error('Error completing workout:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save workout completion. Please try again.",
-        variant: "destructive"
-      });
-    }
+    await handleCompleteWorkout();
   };
 
   const completedSets = todaysWorkout.reduce((total, exercise) => 
@@ -223,13 +123,10 @@ const Dashboard = () => {
   );
   const totalSets = todaysWorkout.reduce((total, exercise) => total + exercise.sets.length, 0);
 
-  // Group exercises by category
   const mainExercises = todaysWorkout.filter(ex => ex.category === 'Main');
   const coreExercises = todaysWorkout.filter(ex => ex.category === 'Core');
 
-  // Get current active exercise based on completion
   const getCurrentActiveExercise = () => {
-    // First check main exercises
     for (let i = 0; i < mainExercises.length; i++) {
       const exercise = mainExercises[i];
       const isCompleted = exercise.sets.every(set => set === true);
@@ -238,7 +135,6 @@ const Dashboard = () => {
       }
     }
     
-    // If all main exercises are completed, check core exercises
     for (let i = 0; i < coreExercises.length; i++) {
       const exercise = coreExercises[i];
       const isCompleted = exercise.sets.every(set => set === true);
@@ -262,7 +158,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Review Form Modal */}
       {showReviewForm && (
         <CompletionReviewForm
           userName={user.name}
@@ -270,22 +165,18 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Main Content */}
       <div className="pb-20 px-4 pt-6 space-y-4">
-        {/* Header */}
         <DashboardHeader 
           userName={user.name}
           currentDay={user.currentDay}
           streak={user.streak}
         />
 
-        {/* Progress Card */}
         <ProgressCard 
           completedSets={completedSets}
           totalSets={totalSets}
         />
 
-        {/* Workout Details Card */}
         {workoutDetails && (
           <WorkoutDetailsCard 
             dayTitle={workoutDetails.dayTitle}
@@ -294,12 +185,10 @@ const Dashboard = () => {
           />
         )}
 
-        {/* Cardio/Notes Card */}
         {workoutDetails?.cardioNotes && (
           <CardioNotesCard cardioNotes={workoutDetails.cardioNotes} />
         )}
 
-        {/* Current Active Exercise */}
         {currentActiveExercise && (
           <CurrentExerciseCard
             exercise={currentActiveExercise.exercise}
@@ -316,7 +205,6 @@ const Dashboard = () => {
           />
         )}
 
-        {/* No Workout Message */}
         {todaysWorkout.length === 0 && (
           <Card className="border-0 shadow-sm">
             <CardContent className="p-8 text-center">
@@ -326,7 +214,6 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Complete Workout Button */}
         {todaysWorkout.length > 0 && (
           <CompleteWorkoutButton
             isWorkoutComplete={isWorkoutComplete()}
@@ -334,11 +221,9 @@ const Dashboard = () => {
           />
         )}
 
-        {/* Daily Motivation */}
         <MotivationCard quote={dailyQuote} />
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNavigation />
     </div>
   );

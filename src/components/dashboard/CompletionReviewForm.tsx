@@ -1,13 +1,15 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, Mail, Trophy, Sparkles } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ReviewHeader from './completion-review/ReviewHeader';
+import RatingSection from './completion-review/RatingSection';
+import ReviewTextSection from './completion-review/ReviewTextSection';
+import NewsletterSection from './completion-review/NewsletterSection';
+import ComingSoonSection from './completion-review/ComingSoonSection';
+import FormActions from './completion-review/FormActions';
 
 interface CompletionReviewFormProps {
   userName: string;
@@ -21,10 +23,6 @@ const CompletionReviewForm = ({ userName, onClose }: CompletionReviewFormProps) 
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newsletterSignup, setNewsletterSignup] = useState(false);
-
-  const handleStarClick = (selectedRating: number) => {
-    setRating(selectedRating);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +42,6 @@ const CompletionReviewForm = ({ userName, onClose }: CompletionReviewFormProps) 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Submit review
       const { error: reviewError } = await supabase
         .from('user_reviews')
         .insert({
@@ -85,129 +82,38 @@ const CompletionReviewForm = ({ userName, onClose }: CompletionReviewFormProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Trophy className="h-16 w-16 text-yellow-500" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            🎉 Congratulations {userName}!
-          </CardTitle>
-          <p className="text-gray-600">
-            You've completed the 45-Day Fitness Challenge! Help us improve and stay connected.
-          </p>
-        </CardHeader>
+      <Card className="w-full max-w-md mx-auto max-h-[90vh]">
+        <ReviewHeader userName={userName} />
         
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Rating Section */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Rate your experience:</Label>
-              <div className="flex justify-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => handleStarClick(star)}
-                    className="focus:outline-none"
-                  >
-                    <Star
-                      className={`h-8 w-8 transition-colors ${
-                        star <= rating 
-                          ? 'text-yellow-400 fill-yellow-400' 
-                          : 'text-gray-300 hover:text-yellow-200'
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Review Text */}
-            <div className="space-y-2">
-              <Label htmlFor="review">Share your experience (optional):</Label>
-              <Textarea
-                id="review"
-                placeholder="Tell us about your journey, what you enjoyed, or how we can improve..."
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                className="min-h-[80px]"
+        <ScrollArea className="max-h-[60vh]">
+          <CardContent className="px-6 pb-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <RatingSection 
+                rating={rating} 
+                onRatingChange={setRating}
               />
-            </div>
 
-            {/* Newsletter Signup */}
-            <div className="space-y-3 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-orange-600" />
-                <h3 className="font-semibold text-orange-800">Stay Connected!</h3>
-              </div>
-              <p className="text-sm text-orange-700">
-                Join our newsletter for new challenges, fitness tips, and exclusive content coming soon!
-              </p>
-              
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="newsletter"
-                  checked={newsletterSignup}
-                  onChange={(e) => setNewsletterSignup(e.target.checked)}
-                  className="rounded"
-                />
-                <Label htmlFor="newsletter" className="text-sm text-orange-800">
-                  Yes, sign me up for the newsletter!
-                </Label>
-              </div>
+              <ReviewTextSection 
+                review={review} 
+                onReviewChange={setReview}
+              />
 
-              {newsletterSignup && (
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm text-orange-800">
-                    <Mail className="h-4 w-4 inline mr-1" />
-                    Email address:
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required={newsletterSignup}
-                    className="bg-white"
-                  />
-                </div>
-              )}
-            </div>
+              <NewsletterSection
+                newsletterSignup={newsletterSignup}
+                email={email}
+                onNewsletterChange={setNewsletterSignup}
+                onEmailChange={setEmail}
+              />
 
-            {/* Coming Soon Section */}
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-semibold text-gray-800 mb-2">🚀 Coming Soon:</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Advanced 90-Day Transformation Challenge</li>
-                <li>• Nutrition Planning & Meal Prep Guides</li>
-                <li>• Community Challenges & Leaderboards</li>
-                <li>• Personal Training Sessions</li>
-              </ul>
-            </div>
+              <ComingSoonSection />
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                Skip for Now
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 bg-orange-500 hover:bg-orange-600"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Review'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
+              <FormActions 
+                isSubmitting={isSubmitting}
+                onClose={onClose}
+              />
+            </form>
+          </CardContent>
+        </ScrollArea>
       </Card>
     </div>
   );
