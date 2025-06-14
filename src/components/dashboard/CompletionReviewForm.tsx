@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import ReviewHeader from './completion-review/ReviewHeader';
 import RatingSection from './completion-review/RatingSection';
 import ReviewTextSection from './completion-review/ReviewTextSection';
@@ -82,10 +81,10 @@ const CompletionReviewForm = ({ userName, onClose }: CompletionReviewFormProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md mx-auto max-h-[90vh]">
+      <Card className="w-full max-w-md mx-auto max-h-[95vh] flex flex-col">
         <ReviewHeader userName={userName} />
         
-        <ScrollArea className="max-h-[60vh]">
+        <div className="flex-1 overflow-y-auto">
           <CardContent className="px-6 pb-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <RatingSection 
@@ -113,7 +112,7 @@ const CompletionReviewForm = ({ userName, onClose }: CompletionReviewFormProps) 
               />
             </form>
           </CardContent>
-        </ScrollArea>
+        </div>
       </Card>
     </div>
   );
