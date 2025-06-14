@@ -75,6 +75,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_reviews: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          newsletter_signup: boolean
+          rating: number
+          review_text: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          newsletter_signup?: boolean
+          rating: number
+          review_text?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          newsletter_signup?: boolean
+          rating?: number
+          review_text?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_progress: {
         Row: {
           completed_at: string | null
