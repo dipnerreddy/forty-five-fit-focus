@@ -55,13 +55,6 @@ const Index = () => {
     }
   ];
 
-  const stats = [
-    { number: "10,847", label: "Challengers Started", icon: Users },
-    { number: "2,156", label: "Certificates Earned", icon: Award },
-    { number: "89%", label: "Report Better Sleep", icon: Clock },
-    { number: "94%", label: "Feel More Confident", icon: TrendingUp }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       {/* Enhanced Hero Section */}
@@ -98,19 +91,6 @@ const Index = () => {
                     Continue Journey
                   </Button>
                 </Link>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-orange-100">
-                    <div className="flex justify-center mb-2">
-                      <stat.icon className="h-6 w-6 text-orange-500" />
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black text-gray-900">{stat.number}</div>
-                    <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
