@@ -9,13 +9,19 @@ interface LogoutSectionProps {
 }
 
 const LogoutSection = ({ onLogout }: LogoutSectionProps) => {
+  const handleLogoutClick = () => {
+    console.log('Logout button clicked');
+    onLogout();
+  };
+
   return (
     <Card className="border-0 shadow-sm">
       <CardContent className="p-4">
         <Button
-          onClick={onLogout}
+          onClick={handleLogoutClick}
           variant="outline"
           className="w-full flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+          type="button"
         >
           <LogOut className="h-4 w-4" />
           Logout

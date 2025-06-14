@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -119,14 +118,42 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate('/login');
+      console.log('Attempting to logout...');
+      
+      // Clear any local state first
+      setProfile(null);
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        toast({
+          title: "Logout Error",
+          description: "Failed to logout. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('Logout successful, navigating to login...');
+      
+      // Navigate to login page
+      navigate('/login', { replace: true });
+      
+      // Show success message
       toast({
         title: "Logged out successfully",
         description: "See you next time!"
       });
+      
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Unexpected logout error:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred during logout.",
+        variant: "destructive"
+      });
     }
   };
 
