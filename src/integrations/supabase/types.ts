@@ -30,6 +30,30 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_workout_windows: {
+        Row: {
+          created_at: string | null
+          date: string
+          end_time: string
+          id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          end_time: string
+          id?: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number
@@ -38,6 +62,8 @@ export type Database = {
           gender: string | null
           has_seen_tutorial: boolean | null
           id: string
+          last_activity_date: string | null
+          last_workout_date: string | null
           name: string
           routine: string
           routine_changed_at: string | null
@@ -53,6 +79,8 @@ export type Database = {
           gender?: string | null
           has_seen_tutorial?: boolean | null
           id?: string
+          last_activity_date?: string | null
+          last_workout_date?: string | null
           name: string
           routine: string
           routine_changed_at?: string | null
@@ -68,6 +96,8 @@ export type Database = {
           gender?: string | null
           has_seen_tutorial?: boolean | null
           id?: string
+          last_activity_date?: string | null
+          last_workout_date?: string | null
           name?: string
           routine?: string
           routine_changed_at?: string | null
@@ -141,6 +171,33 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_reminders: {
+        Row: {
+          created_at: string | null
+          id: string
+          reminder_date: string
+          sent_at: string | null
+          user_id: string
+          workout_completed: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reminder_date: string
+          sent_at?: string | null
+          user_id: string
+          workout_completed?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reminder_date?: string
+          sent_at?: string | null
+          user_id?: string
+          workout_completed?: boolean | null
+        }
+        Relationships: []
+      }
       workout_sessions: {
         Row: {
           created_at: string
@@ -182,7 +239,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_complete_workout_today: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
+      get_current_workout_window: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          current_date_ist: string
+          window_start: string
+          window_end: string
+        }[]
+      }
+      reset_inactive_user_streaks: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

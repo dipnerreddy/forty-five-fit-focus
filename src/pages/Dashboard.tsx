@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchWorkoutPlan, getTodaysWorkout } from '@/utils/workoutData';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useWorkoutCompletion } from '@/hooks/useWorkoutCompletion';
+import { useDailyWorkoutStatus } from '@/hooks/useDailyWorkoutStatus';
 import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 
 // Import components
@@ -38,12 +39,16 @@ const Dashboard = () => {
     setShowReviewForm
   } = useUserProfile();
 
+  const { canCompleteToday, isLoading: workoutStatusLoading, refreshStatus } = useDailyWorkoutStatus();
+
   const { completeWorkout: handleCompleteWorkout } = useWorkoutCompletion({
     user,
     setUser,
     hasCompletedChallenge,
     setHasCompletedChallenge,
-    setShowReviewForm
+    setShowReviewForm,
+    canCompleteToday,
+    refreshWorkoutStatus: refreshStatus
   });
 
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
@@ -149,7 +154,7 @@ const Dashboard = () => {
 
   const currentActiveExercise = getCurrentActiveExercise();
 
-  if (isLoading) {
+  if (isLoading || workoutStatusLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -177,6 +182,19 @@ const Dashboard = () => {
           />
         </div>
 
+        {!canCompleteToday && (
+          <Card className="border-0 shadow-sm bg-amber-50 border-amber-200">
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-amber-800 font-medium">🎉 Workout Complete for Today!</p>
+                <p className="text-amber-700 text-sm mt-1">
+                  Come back tomorrow at 3:00 AM IST for your next workout.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div data-tutorial="progress">
           <ProgressCard 
             completedSets={completedSets}
@@ -198,7 +216,7 @@ const Dashboard = () => {
           <CardioNotesCard cardioNotes={workoutDetails.cardioNotes} />
         )}
 
-        {currentActiveExercise && (
+        {currentActiveExercise && canCompleteToday && (
           <div data-tutorial="current-exercise">
             <CurrentExerciseCard
               exercise={currentActiveExercise.exercise}
@@ -225,7 +243,7 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {todaysWorkout.length > 0 && (
+        {todaysWorkout.length > 0 && canCompleteToday && (
           <div data-tutorial="complete-button">
             <CompleteWorkoutButton
               isWorkoutComplete={isWorkoutComplete()}
