@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -196,6 +197,31 @@ const Dashboard = () => {
   const mainExercises = todaysWorkout.filter(ex => ex.category === 'Main');
   const coreExercises = todaysWorkout.filter(ex => ex.category === 'Core');
 
+  // Get current active exercise based on completion
+  const getCurrentActiveExercise = () => {
+    // First check main exercises
+    for (let i = 0; i < mainExercises.length; i++) {
+      const exercise = mainExercises[i];
+      const isCompleted = exercise.sets.every(set => set === true);
+      if (!isCompleted) {
+        return { exercise, category: 'Main', index: i };
+      }
+    }
+    
+    // If all main exercises are completed, check core exercises
+    for (let i = 0; i < coreExercises.length; i++) {
+      const exercise = coreExercises[i];
+      const isCompleted = exercise.sets.every(set => set === true);
+      if (!isCompleted) {
+        return { exercise, category: 'Core', index: i };
+      }
+    }
+    
+    return null;
+  };
+
+  const currentActiveExercise = getCurrentActiveExercise();
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -224,25 +250,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Workout Details Card */}
-        {workoutDetails && (
-          <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  <h2 className="text-xl font-bold">{workoutDetails.dayTitle}</h2>
-                </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                  {user.routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> : <Home className="h-4 w-4 mr-1" />}
-                  {user.routine}
-                </Badge>
-              </div>
-              <p className="text-blue-100 text-sm">{workoutDetails.dayFocus}</p>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Progress Card */}
         <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white">
           <CardContent className="p-6">
@@ -269,6 +276,25 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Workout Details Card */}
+        {workoutDetails && (
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  <h2 className="text-xl font-bold">{workoutDetails.dayTitle}</h2>
+                </div>
+                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                  {user.routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> : <Home className="h-4 w-4 mr-1" />}
+                  {user.routine}
+                </Badge>
+              </div>
+              <p className="text-blue-100 text-sm">{workoutDetails.dayFocus}</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Cardio/Notes Card */}
         {workoutDetails?.cardioNotes && (
           <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-l-green-500">
@@ -284,114 +310,73 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* Main Exercises */}
-        {mainExercises.length > 0 && (
+        {/* Current Active Exercise */}
+        {currentActiveExercise && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 px-2">
-              <Target className="h-5 w-5 text-gray-600" />
-              <h3 className="font-semibold text-gray-800">Main Exercises</h3>
+              {currentActiveExercise.category === 'Main' ? (
+                <>
+                  <Target className="h-5 w-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-800">Current Exercise - Main</h3>
+                </>
+              ) : (
+                <>
+                  <Zap className="h-5 w-5 text-purple-600" />
+                  <h3 className="font-semibold text-gray-800">Current Exercise - Core</h3>
+                </>
+              )}
             </div>
-            {mainExercises.map((exercise, exerciseIndex) => {
-              const actualIndex = todaysWorkout.findIndex(ex => ex.title === exercise.title);
-              return (
-                <Card key={actualIndex} className="border-0 shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">{exercise.title}</h3>
-                      {user.routine === 'Gym' && (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            placeholder="kg"
-                            value={exercise.weight || ''}
-                            onChange={(e) => updateWeight(actualIndex, Number(e.target.value))}
-                            className="w-16 h-8 text-sm"
-                          />
-                        </div>
-                      )}
+            
+            <Card className={`border-0 shadow-lg ${currentActiveExercise.category === 'Core' ? 'border-l-4 border-l-purple-500' : ''}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-lg">{currentActiveExercise.exercise.title}</h3>
+                  {user.routine === 'Gym' && (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        placeholder="kg"
+                        value={currentActiveExercise.exercise.weight || ''}
+                        onChange={(e) => {
+                          const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+                          updateWeight(actualIndex, Number(e.target.value));
+                        }}
+                        className="w-16 h-8 text-sm"
+                      />
                     </div>
-                    
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      {exercise.sets.map((completed, setIndex) => (
-                        <div key={setIndex} className="flex items-center justify-center">
-                          <Checkbox
-                            checked={completed}
-                            onCheckedChange={(checked) => 
-                              updateSet(actualIndex, setIndex, checked as boolean)
-                            }
-                            className="w-6 h-6"
-                          />
-                        </div>
-                      ))}
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {currentActiveExercise.exercise.sets.map((completed, setIndex) => (
+                    <div key={setIndex} className="flex items-center justify-center">
+                      <Checkbox
+                        checked={completed}
+                        onCheckedChange={(checked) => {
+                          const actualIndex = todaysWorkout.findIndex(ex => ex.title === currentActiveExercise.exercise.title);
+                          updateSet(actualIndex, setIndex, checked as boolean);
+                        }}
+                        className="w-6 h-6"
+                      />
                     </div>
-                    
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 mb-1">{exercise.sets.length} sets × {exercise.reps}</div>
-                      <div className="flex justify-center space-x-1">
-                        {exercise.sets.map((completed, setIndex) => (
-                          <div
-                            key={setIndex}
-                            className={`w-2 h-2 rounded-full ${
-                              completed ? 'bg-orange-500' : 'bg-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Core Exercises */}
-        {coreExercises.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2">
-              <Zap className="h-5 w-5 text-purple-600" />
-              <h3 className="font-semibold text-gray-800">Core Exercises</h3>
-            </div>
-            {coreExercises.map((exercise, exerciseIndex) => {
-              const actualIndex = todaysWorkout.findIndex(ex => ex.title === exercise.title);
-              return (
-                <Card key={actualIndex} className="border-0 shadow-sm border-l-4 border-l-purple-500">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">{exercise.title}</h3>
-                    </div>
-                    
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      {exercise.sets.map((completed, setIndex) => (
-                        <div key={setIndex} className="flex items-center justify-center">
-                          <Checkbox
-                            checked={completed}
-                            onCheckedChange={(checked) => 
-                              updateSet(actualIndex, setIndex, checked as boolean)
-                            }
-                            className="w-6 h-6"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="text-xs text-gray-500 mb-1">{exercise.sets.length} sets × {exercise.reps}</div>
-                      <div className="flex justify-center space-x-1">
-                        {exercise.sets.map((completed, setIndex) => (
-                          <div
-                            key={setIndex}
-                            className={`w-2 h-2 rounded-full ${
-                              completed ? 'bg-purple-500' : 'bg-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  ))}
+                </div>
+                
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-1">{currentActiveExercise.exercise.sets.length} sets × {currentActiveExercise.exercise.reps}</div>
+                  <div className="flex justify-center space-x-1">
+                    {currentActiveExercise.exercise.sets.map((completed, setIndex) => (
+                      <div
+                        key={setIndex}
+                        className={`w-2 h-2 rounded-full ${
+                          completed ? (currentActiveExercise.category === 'Core' ? 'bg-purple-500' : 'bg-orange-500') : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
