@@ -2,10 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, Dumbbell, X } from 'lucide-react';
+import { Home, Dumbbell, Settings, X } from 'lucide-react';
 
 interface RoutineSelectorProps {
-  currentRoutine: 'Home' | 'Gym';
+  currentRoutine: 'Home' | 'Gym' | 'Custom';
   onSelect: (routine: 'Home' | 'Gym') => void;
   onClose: () => void;
 }
@@ -56,6 +56,16 @@ const RoutineSelector: React.FC<RoutineSelectorProps> = ({
                 <div className="text-xs opacity-75">Full gym equipment</div>
               </div>
             </Button>
+
+            {currentRoutine === 'Custom' && (
+              <div className="h-16 flex flex-col items-center justify-center gap-2 border border-orange-200 bg-orange-50 rounded-md">
+                <Settings className="h-6 w-6 text-orange-600" />
+                <div className="text-center">
+                  <div className="font-medium text-orange-800">Custom Routine</div>
+                  <div className="text-xs text-orange-600">Currently active</div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="text-center pt-2">

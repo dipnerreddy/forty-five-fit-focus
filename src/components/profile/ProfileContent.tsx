@@ -13,13 +13,14 @@ interface UserProfile {
   age: number;
   gender: string;
   weight: number;
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom';
   current_day: number;
   streak: number;
   email?: string;
   date_of_birth?: string;
   profile_picture_url?: string;
   weight_updated_at?: string;
+  custom_sheet_url?: string;
 }
 
 interface ProfileContentProps {
@@ -53,6 +54,7 @@ const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }:
         currentDay={profile.current_day}
         streak={profile.streak}
         onRoutineChange={onRoutineChange}
+        customSheetUrl={profile.custom_sheet_url}
       />
 
       <ProgressOverview 

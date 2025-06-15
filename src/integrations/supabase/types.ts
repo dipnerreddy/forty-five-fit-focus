@@ -72,6 +72,30 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_routine_codes: {
+        Row: {
+          created_at: string
+          google_sheet_url: string
+          id: string
+          is_active: boolean
+          secret_code: string
+        }
+        Insert: {
+          created_at?: string
+          google_sheet_url: string
+          id?: string
+          is_active?: boolean
+          secret_code: string
+        }
+        Update: {
+          created_at?: string
+          google_sheet_url?: string
+          id?: string
+          is_active?: boolean
+          secret_code?: string
+        }
+        Relationships: []
+      }
       daily_completions: {
         Row: {
           completed_at: string
@@ -122,6 +146,7 @@ export type Database = {
           age: number
           created_at: string
           current_day: number
+          custom_sheet_url: string | null
           date_of_birth: string | null
           email: string | null
           gender: string | null
@@ -143,6 +168,7 @@ export type Database = {
           age: number
           created_at?: string
           current_day?: number
+          custom_sheet_url?: string | null
           date_of_birth?: string | null
           email?: string | null
           gender?: string | null
@@ -164,6 +190,7 @@ export type Database = {
           age?: number
           created_at?: string
           current_day?: number
+          custom_sheet_url?: string | null
           date_of_birth?: string | null
           email?: string | null
           gender?: string | null

@@ -9,13 +9,14 @@ interface UserProfile {
   age: number;
   gender: string;
   weight: number;
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom';
   current_day: number;
   streak: number;
   email?: string;
   date_of_birth?: string;
   profile_picture_url?: string;
   weight_updated_at?: string;
+  custom_sheet_url?: string;
 }
 
 export const useProfileData = () => {
@@ -49,13 +50,14 @@ export const useProfileData = () => {
           age: profileData.age,
           gender: profileData.gender,
           weight: profileData.weight,
-          routine: profileData.routine as 'Home' | 'Gym',
+          routine: profileData.routine as 'Home' | 'Gym' | 'Custom',
           current_day: profileData.current_day,
           streak: profileData.streak,
           email: profileData.email,
           date_of_birth: profileData.date_of_birth,
           profile_picture_url: profileData.profile_picture_url,
           weight_updated_at: profileData.weight_updated_at,
+          custom_sheet_url: profileData.custom_sheet_url,
         });
       }
     } catch (error) {
@@ -69,16 +71,21 @@ export const useProfileData = () => {
     fetchProfile();
   }, [navigate]);
 
-  const handleRoutineChange = async (newRoutine: 'Home' | 'Gym') => {
+  const handleRoutineChange = async (newRoutine: 'Home' | 'Gym' | 'Custom', customSheetUrl?: string) => {
     if (!profile) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      const updateData: any = { routine: newRoutine };
+      if (newRoutine === 'Custom' && customSheetUrl) {
+        updateData.custom_sheet_url = customSheetUrl;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({ routine: newRoutine })
+        .update(updateData)
         .eq('user_id', session.user.id);
 
       if (error) {
@@ -95,12 +102,14 @@ export const useProfileData = () => {
         ...prev,
         routine: newRoutine,
         current_day: 1,
-        streak: 0
+        streak: 0,
+        custom_sheet_url: customSheetUrl || prev.custom_sheet_url
       } : null);
 
+      const routineDisplayName = newRoutine === 'Custom' ? 'Custom' : `${newRoutine}`;
       toast({
         title: "Routine Changed! 🔄",
-        description: `Switched to ${newRoutine} routine. Your progress has been reset but your history is preserved.`
+        description: `Switched to ${routineDisplayName} routine. Your progress has been reset but your history is preserved.`
       });
     } catch (error) {
       console.error('Error changing routine:', error);

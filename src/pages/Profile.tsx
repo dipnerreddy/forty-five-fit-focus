@@ -6,16 +6,23 @@ import { ArrowLeft } from 'lucide-react';
 import RoutineSelector from '@/components/RoutineSelector';
 import ProfileContent from '@/components/profile/ProfileContent';
 import BottomNavigation from '@/components/profile/BottomNavigation';
+import CustomWorkoutButton from '@/components/profile/CustomWorkoutButton';
+import CustomWorkoutModal from '@/components/profile/CustomWorkoutModal';
 import { useProfileData } from '@/hooks/useProfileData';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, isLoading, handleRoutineChange, handleLogout, refreshProfile } = useProfileData();
   const [showRoutineSelector, setShowRoutineSelector] = useState(false);
+  const [showCustomWorkoutModal, setShowCustomWorkoutModal] = useState(false);
 
   const onRoutineChange = async (newRoutine: 'Home' | 'Gym') => {
     await handleRoutineChange(newRoutine);
     setShowRoutineSelector(false);
+  };
+
+  const onCustomRoutineActivated = async (sheetUrl: string) => {
+    await handleRoutineChange('Custom', sheetUrl);
   };
 
   if (isLoading) {
@@ -58,6 +65,8 @@ const Profile = () => {
         onProfileUpdate={refreshProfile}
       />
 
+      <CustomWorkoutButton onClick={() => setShowCustomWorkoutModal(true)} />
+
       <BottomNavigation />
 
       {/* Routine Selector Modal */}
@@ -68,6 +77,13 @@ const Profile = () => {
           onClose={() => setShowRoutineSelector(false)}
         />
       )}
+
+      {/* Custom Workout Modal */}
+      <CustomWorkoutModal
+        isOpen={showCustomWorkoutModal}
+        onClose={() => setShowCustomWorkoutModal(false)}
+        onCustomRoutineActivated={onCustomRoutineActivated}
+      />
     </div>
   );
 };
