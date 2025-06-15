@@ -1,14 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ProfileHeader from './ProfileHeader';
 import CertificateSection from './CertificateSection';
 import StatsCards from './StatsCards';
 import WorkoutSettings from './WorkoutSettings';
 import ProgressOverview from './ProgressOverview';
 import LogoutSection from './LogoutSection';
-import WeightUpdateCard from './WeightUpdateCard';
-import PersonalInfoCard from './PersonalInfoCard';
-import ProfilePictureCard from './ProfilePictureCard';
+import ProfileEditModal from './ProfileEditModal';
 
 interface UserProfile {
   name: string;
@@ -32,6 +30,8 @@ interface ProfileContentProps {
 }
 
 const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }: ProfileContentProps) => {
+  const [showEditModal, setShowEditModal] = useState(false);
+
   return (
     <div className="pb-20 px-4 pt-6 space-y-4">
       <ProfileHeader 
@@ -41,25 +41,7 @@ const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }:
         currentDay={profile.current_day}
         streak={profile.streak}
         profilePictureUrl={profile.profile_picture_url}
-      />
-
-      <ProfilePictureCard
-        name={profile.name}
-        profilePictureUrl={profile.profile_picture_url}
-        onPictureUpdate={onProfileUpdate}
-      />
-
-      <PersonalInfoCard
-        name={profile.name}
-        email={profile.email}
-        dateOfBirth={profile.date_of_birth}
-        onInfoUpdate={onProfileUpdate}
-      />
-
-      <WeightUpdateCard
-        currentWeight={profile.weight}
-        lastUpdated={profile.weight_updated_at}
-        onWeightUpdate={onProfileUpdate}
+        onEditProfile={() => setShowEditModal(true)}
       />
 
       <CertificateSection streak={profile.streak} />
@@ -79,6 +61,13 @@ const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }:
       />
 
       <LogoutSection onLogout={onLogout} />
+
+      <ProfileEditModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        profile={profile}
+        onProfileUpdate={onProfileUpdate}
+      />
     </div>
   );
 };

@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { User as UserIcon, Edit } from 'lucide-react';
 
 interface ProfileHeaderProps {
   name: string;
@@ -11,16 +12,27 @@ interface ProfileHeaderProps {
   currentDay: number;
   streak: number;
   profilePictureUrl?: string;
+  onEditProfile: () => void;
 }
 
-const ProfileHeader = ({ name, age, gender, currentDay, streak, profilePictureUrl }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, age, gender, currentDay, streak, profilePictureUrl, onEditProfile }: ProfileHeaderProps) => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
     <Card className="border-0 shadow-sm">
-      <CardContent className="p-6 text-center">
+      <CardContent className="p-6 text-center relative">
+        {/* Edit button in top right corner */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onEditProfile}
+          className="absolute top-4 right-4 p-2"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+
         <Avatar className="w-20 h-20 mx-auto mb-4">
           <AvatarImage src={profilePictureUrl} alt={name} />
           <AvatarFallback className="text-lg bg-orange-100 text-orange-600">
