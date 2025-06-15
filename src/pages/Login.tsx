@@ -2,19 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Flame, ArrowLeft } from 'lucide-react';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
+import EmailInput from '@/components/auth/EmailInput';
+import PasswordInput from '@/components/auth/PasswordInput';
 
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -35,18 +36,33 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic validation
+  const validateForm = () => {
     if (!formData.email || !formData.password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
         variant: "destructive"
       });
-      return;
+      return false;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
@@ -105,7 +121,8 @@ const Login = () => {
         <div className="flex items-center justify-between max-w-md mx-auto">
           <Link 
             to="/" 
-            className="flex items-center gap-2 text-orange-600 hover:text-orange-700 transition-colors"
+            className="flex items-center gap-2 text-orange-600 hover:text-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-md px-2 py-1"
+            aria-label="Go back to home page"
           >
             <ArrowLeft className="h-5 w-5" />
             <span className="font-medium">Back</span>
@@ -131,48 +148,53 @@ const Login = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                    disabled={isLoading}
-                    className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
-                  />
-                </div>
+              <form onSubmit={handleLogin} className="space-y-5" noValidate>
+                <EmailInput
+                  id="email"
+                  label="Email Address"
+                  value={formData.email}
+                  onChange={(value) => handleInputChange('email', value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={isLoading}
+                />
                 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    placeholder="Enter your password"
-                    required
+                <PasswordInput
+                  id="password"
+                  label="Password"
+                  value={formData.password}
+                  onChange={(value) => handleInputChange('password', value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={isLoading}
+                  className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
+                />
+
+                {/* Remember Me */}
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     disabled={isLoading}
-                    className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
+                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                   />
+                  <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
+                    Keep me signed in
+                  </label>
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-base"
+                  className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                   disabled={isLoading}
+                  aria-describedby="login-button-description"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Signing in...
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true"></div>
+                      <span>Signing in...</span>
                     </div>
                   ) : (
                     "Sign In"
@@ -185,7 +207,8 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                  aria-label="Open forgot password dialog"
                 >
                   Forgot Password?
                 </button>
@@ -203,7 +226,8 @@ const Login = () => {
               <Link to="/signup" className="block">
                 <Button 
                   variant="outline" 
-                  className="w-full h-12 border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-semibold rounded-lg transition-all duration-200 text-base"
+                  className="w-full h-12 border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-semibold rounded-lg transition-all duration-200 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  disabled={isLoading}
                 >
                   Start Your Journey
                 </Button>
