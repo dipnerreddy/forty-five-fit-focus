@@ -20,27 +20,59 @@ const ResetPassword = () => {
     password: '',
     confirmPassword: ''
   });
+  const [isValidSession, setIsValidSession] = useState(false);
 
   useEffect(() => {
-    // Check if we have the necessary tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
-    if (!accessToken || !refreshToken) {
-      toast({
-        title: "Invalid Link",
-        description: "This password reset link is invalid or has expired.",
-        variant: "destructive"
-      });
-      navigate('/login');
-      return;
-    }
+    const initializeReset = async () => {
+      // Check if this is a password reset flow
+      const type = searchParams.get('type');
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      
+      console.log('Reset password params:', { type, accessToken: !!accessToken, refreshToken: !!refreshToken });
+      
+      if (type !== 'recovery' || !accessToken || !refreshToken) {
+        toast({
+          title: "Invalid Link",
+          description: "This password reset link is invalid or has expired.",
+          variant: "destructive"
+        });
+        navigate('/login');
+        return;
+      }
 
-    // Set the session with the tokens from the URL
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken
-    });
+      try {
+        // Set the session with the tokens from the URL
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+
+        if (error) {
+          console.error('Session error:', error);
+          toast({
+            title: "Invalid Link",
+            description: "This password reset link is invalid or has expired.",
+            variant: "destructive"
+          });
+          navigate('/login');
+          return;
+        }
+
+        console.log('Session set successfully:', data);
+        setIsValidSession(true);
+      } catch (error) {
+        console.error('Session setup error:', error);
+        toast({
+          title: "Error",
+          description: "An error occurred while setting up password reset.",
+          variant: "destructive"
+        });
+        navigate('/login');
+      }
+    };
+
+    initializeReset();
   }, [searchParams, navigate, toast]);
 
   const handleInputChange = (field: string, value: string) => {
@@ -49,6 +81,15 @@ const ResetPassword = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isValidSession) {
+      toast({
+        title: "Error",
+        description: "Invalid session. Please try requesting a new password reset link.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Validation
     if (!formData.password || !formData.confirmPassword) {
@@ -99,7 +140,8 @@ const ResetPassword = () => {
         description: "Your password has been updated successfully."
       });
       
-      // Redirect to login page
+      // Sign out and redirect to login page
+      await supabase.auth.signOut();
       navigate('/login');
       
     } catch (error) {
@@ -112,6 +154,14 @@ const ResetPassword = () => {
       setIsLoading(false);
     }
   };
+
+  if (!isValidSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 flex items-center justify-center">
+        <div className="text-lg">Validating reset link...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 flex flex-col">
