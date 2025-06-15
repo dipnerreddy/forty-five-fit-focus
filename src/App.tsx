@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
+import VerifyCertificate from "./pages/VerifyCertificate";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +64,9 @@ const App = () => {
                     <ResetPassword />
                   </PublicRoute>
                 } />
+                
+                {/* New: Public certificate verification */}
+                <Route path="/verify/:credentialId" element={<VerifyCertificate />} />
                 
                 {/* Protected routes - only accessible when logged in */}
                 <Route path="/dashboard" element={
