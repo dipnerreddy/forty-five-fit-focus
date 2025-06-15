@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -148,18 +149,9 @@ const Login = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                      Password
-                    </Label>
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotPassword(true)}
-                      className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
-                    >
-                      Forgot Password?
-                    </button>
-                  </div>
+                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                    Password
+                  </Label>
                   <Input
                     id="password"
                     type="password"
@@ -187,6 +179,17 @@ const Login = () => {
                   )}
                 </Button>
               </form>
+              
+              {/* Forgot Password Button */}
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
