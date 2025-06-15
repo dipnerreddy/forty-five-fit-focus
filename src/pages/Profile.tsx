@@ -10,7 +10,7 @@ import { useProfileData } from '@/hooks/useProfileData';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { profile, isLoading, handleRoutineChange, handleLogout } = useProfileData();
+  const { profile, isLoading, handleRoutineChange, handleLogout, refreshProfile } = useProfileData();
   const [showRoutineSelector, setShowRoutineSelector] = useState(false);
 
   const onRoutineChange = async (newRoutine: 'Home' | 'Gym') => {
@@ -55,6 +55,7 @@ const Profile = () => {
         profile={profile}
         onRoutineChange={() => setShowRoutineSelector(true)}
         onLogout={handleLogout}
+        onProfileUpdate={refreshProfile}
       />
 
       <BottomNavigation />

@@ -59,52 +59,64 @@ export type Database = {
           age: number
           created_at: string
           current_day: number
+          date_of_birth: string | null
+          email: string | null
           gender: string | null
           has_seen_tutorial: boolean | null
           id: string
           last_activity_date: string | null
           last_workout_date: string | null
           name: string
+          profile_picture_url: string | null
           routine: string
           routine_changed_at: string | null
           streak: number
           updated_at: string
           user_id: string
           weight: number
+          weight_updated_at: string | null
         }
         Insert: {
           age: number
           created_at?: string
           current_day?: number
+          date_of_birth?: string | null
+          email?: string | null
           gender?: string | null
           has_seen_tutorial?: boolean | null
           id?: string
           last_activity_date?: string | null
           last_workout_date?: string | null
           name: string
+          profile_picture_url?: string | null
           routine: string
           routine_changed_at?: string | null
           streak?: number
           updated_at?: string
           user_id: string
           weight: number
+          weight_updated_at?: string | null
         }
         Update: {
           age?: number
           created_at?: string
           current_day?: number
+          date_of_birth?: string | null
+          email?: string | null
           gender?: string | null
           has_seen_tutorial?: boolean | null
           id?: string
           last_activity_date?: string | null
           last_workout_date?: string | null
           name?: string
+          profile_picture_url?: string | null
           routine?: string
           routine_changed_at?: string | null
           streak?: number
           updated_at?: string
           user_id?: string
           weight?: number
+          weight_updated_at?: string | null
         }
         Relationships: []
       }

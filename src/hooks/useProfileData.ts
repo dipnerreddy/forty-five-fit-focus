@@ -12,6 +12,10 @@ interface UserProfile {
   routine: 'Home' | 'Gym';
   current_day: number;
   streak: number;
+  email?: string;
+  date_of_birth?: string;
+  profile_picture_url?: string;
+  weight_updated_at?: string;
 }
 
 export const useProfileData = () => {
@@ -20,44 +24,48 @@ export const useProfileData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          navigate('/login');
-          return;
-        }
-
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching profile:', error);
-          return;
-        }
-
-        if (profileData) {
-          setProfile({
-            name: profileData.name,
-            age: profileData.age,
-            gender: profileData.gender,
-            weight: profileData.weight,
-            routine: profileData.routine as 'Home' | 'Gym',
-            current_day: profileData.current_day,
-            streak: profileData.streak,
-          });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setIsLoading(false);
+  const fetchProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+        return;
       }
-    };
 
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      if (profileData) {
+        setProfile({
+          name: profileData.name,
+          age: profileData.age,
+          gender: profileData.gender,
+          weight: profileData.weight,
+          routine: profileData.routine as 'Home' | 'Gym',
+          current_day: profileData.current_day,
+          streak: profileData.streak,
+          email: profileData.email,
+          date_of_birth: profileData.date_of_birth,
+          profile_picture_url: profileData.profile_picture_url,
+          weight_updated_at: profileData.weight_updated_at,
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfile();
   }, [navigate]);
 
@@ -108,10 +116,8 @@ export const useProfileData = () => {
     try {
       console.log('Attempting to logout...');
       
-      // Clear any local state first
       setProfile(null);
       
-      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -126,10 +132,8 @@ export const useProfileData = () => {
 
       console.log('Logout successful, navigating to login...');
       
-      // Navigate to login page
       navigate('/login', { replace: true });
       
-      // Show success message
       toast({
         title: "Logged out successfully",
         description: "See you next time!"
@@ -145,10 +149,15 @@ export const useProfileData = () => {
     }
   };
 
+  const refreshProfile = async () => {
+    await fetchProfile();
+  };
+
   return {
     profile,
     isLoading,
     handleRoutineChange,
-    handleLogout
+    handleLogout,
+    refreshProfile
   };
 };
