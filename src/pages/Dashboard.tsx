@@ -19,6 +19,7 @@ import type { UserProfile } from '@/types/UserProfile';
 
 const Dashboard = () => {
   const { toast } = useToast();
+  // All returned by useUserProfile hook use our unified UserProfile type:
   const {
     user,
     setUser,

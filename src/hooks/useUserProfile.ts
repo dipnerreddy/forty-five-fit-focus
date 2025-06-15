@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import type { UserProfile } from '@/types/UserProfile';
+import type { UserProfile, RoutineType } from '@/types/UserProfile';
 
 export const useUserProfile = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ export const useUserProfile = () => {
     name: "Loading...",
     currentDay: 1,
     streak: 0,
-    routine: 'Home'
+    routine: 'Home',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedChallenge, setHasCompletedChallenge] = useState(false);
@@ -37,12 +37,18 @@ export const useUserProfile = () => {
         }
 
         if (profile) {
+          // Cast routine as RoutineType to satisfy TS
+          const rawRoutine = profile.routine as string;
+          const allowedRoutines: RoutineType[] = ['Home', 'Gym', 'Custom'];
+          const routine: RoutineType =
+            allowedRoutines.includes(rawRoutine as RoutineType) ? (rawRoutine as RoutineType) : 'Home';
+
           const userData: UserProfile = {
             name: profile.name,
             currentDay: profile.current_day,
             streak: profile.streak,
-            routine: profile.routine,
-            customSheetUrl: profile.custom_sheet_url
+            routine,
+            customSheetUrl: profile.custom_sheet_url,
           };
           setUser(userData);
 
@@ -75,6 +81,6 @@ export const useUserProfile = () => {
     hasCompletedChallenge,
     setHasCompletedChallenge,
     showReviewForm,
-    setShowReviewForm
+    setShowReviewForm,
   };
 };
