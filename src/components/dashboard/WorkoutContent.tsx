@@ -12,7 +12,7 @@ interface WorkoutContentProps {
     dayFocus: string;
     cardioNotes?: string;
   } | null;
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom';
   currentActiveExercise: {
     exercise: Exercise;
     category: 'Main' | 'Core';

@@ -16,7 +16,7 @@ interface Exercise {
 interface CurrentExerciseCardProps {
   exercise: Exercise;
   category: 'Main' | 'Core';
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom';
   onSetChange: (setIndex: number, completed: boolean) => void;
   onWeightChange: (weight: number) => void;
 }
@@ -48,7 +48,7 @@ const CurrentExerciseCard = ({
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-lg">{exercise.title}</h3>
-            {routine === 'Gym' && (
+            {(routine === 'Gym' || routine === 'Custom') && (
               <div className="flex items-center gap-2">
                 <Input
                   type="number"

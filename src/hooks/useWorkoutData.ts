@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { fetchWorkoutPlan, getTodaysWorkout } from '@/utils/workoutData';
 
@@ -16,7 +15,7 @@ interface WorkoutDetails {
   cardioNotes?: string;
 }
 
-export const useWorkoutData = (routine: 'Home' | 'Gym', currentDay: number, userName: string) => {
+export const useWorkoutData = (routine: 'Home' | 'Gym' | 'Custom', currentDay: number, userName: string, customSheetUrl?: string) => {
   const [todaysWorkout, setTodaysWorkout] = useState<Exercise[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +26,7 @@ export const useWorkoutData = (routine: 'Home' | 'Gym', currentDay: number, user
 
       try {
         setIsLoading(true);
-        const workoutPlan = await fetchWorkoutPlan(routine);
+        const workoutPlan = await fetchWorkoutPlan(routine, customSheetUrl);
         const todaysWorkoutData = getTodaysWorkout(workoutPlan, currentDay);
         
         if (todaysWorkoutData) {
@@ -55,7 +54,7 @@ export const useWorkoutData = (routine: 'Home' | 'Gym', currentDay: number, user
     };
 
     loadWorkoutData();
-  }, [routine, currentDay, userName]);
+  }, [routine, currentDay, userName, customSheetUrl]);
 
   const updateSet = (exerciseIndex: number, setIndex: number, completed: boolean) => {
     setTodaysWorkout(prev => {

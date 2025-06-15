@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, ExternalLink } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,43 +99,30 @@ const WorkoutSettings = ({ routine, currentDay, streak, onRoutineChange, customS
                 </AlertDialogContent>
               </AlertDialog>
             ) : (
-              <div className="flex gap-2">
-                {customSheetUrl && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(customSheetUrl, '_blank')}
-                    className="flex items-center gap-1"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    View Sheet
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Change Routine
                   </Button>
-                )}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Change Routine
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Change from Custom Routine?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will switch you back to standard routines (Home or Gym) and reset your current progress. Your workout history will be preserved in stats.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={onRoutineChange}
-                        className="bg-orange-500 hover:bg-orange-600"
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Change from Custom Routine?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will switch you back to standard routines (Home or Gym) and reset your current progress. Your workout history will be preserved in stats.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={onRoutineChange}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
           

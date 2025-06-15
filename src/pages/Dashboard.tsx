@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -41,7 +40,7 @@ const Dashboard = () => {
     completedSets,
     totalSets,
     getCurrentActiveExercise
-  } = useWorkoutData(user.routine, user.currentDay, user.name);
+  } = useWorkoutData(user.routine, user.currentDay, user.name, user.customSheetUrl);
 
   const { completeWorkout: handleCompleteWorkout } = useWorkoutCompletion({
     user,

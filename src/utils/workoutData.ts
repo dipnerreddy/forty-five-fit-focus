@@ -1,3 +1,4 @@
+
 export interface WorkoutExercise {
   name: string;
   sets: number;
@@ -52,7 +53,7 @@ function parseCSV(csvText: string): string[][] {
 }
 
 // Helper function to normalize category names based on routine type
-function normalizeCategory(category: string, routine: 'Home' | 'Gym'): 'Main' | 'Core' {
+function normalizeCategory(category: string, routine: 'Home' | 'Gym' | 'Custom'): 'Main' | 'Core' {
   const categoryLower = category.toLowerCase().trim();
   
   if (routine === 'Home') {
@@ -61,7 +62,7 @@ function normalizeCategory(category: string, routine: 'Home' | 'Gym'): 'Main' | 
     if (categoryLower === 'cardio') return 'Core';
   }
   
-  // For Gym workouts or fallback, use existing logic
+  // For Gym workouts, Custom workouts, or fallback, use existing logic
   if (categoryLower === 'main') return 'Main';
   if (categoryLower === 'core') return 'Core';
   
@@ -69,9 +70,18 @@ function normalizeCategory(category: string, routine: 'Home' | 'Gym'): 'Main' | 
   return 'Main';
 }
 
-export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWorkout[]> {
+export async function fetchWorkoutPlan(routine: 'Home' | 'Gym' | 'Custom', customSheetUrl?: string): Promise<DayWorkout[]> {
   try {
-    const url = routine === 'Home' ? HOME_WORKOUT_PLAN_URL : GYM_WORKOUT_PLAN_URL;
+    let url: string;
+    
+    if (routine === 'Custom' && customSheetUrl) {
+      url = customSheetUrl;
+    } else if (routine === 'Home') {
+      url = HOME_WORKOUT_PLAN_URL;
+    } else {
+      url = GYM_WORKOUT_PLAN_URL;
+    }
+    
     const response = await fetch(url);
     
     if (!response.ok) {
