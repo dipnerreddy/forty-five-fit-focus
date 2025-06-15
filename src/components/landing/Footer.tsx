@@ -1,9 +1,18 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, Heart, Mail } from 'lucide-react';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
+  const handleScroll = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-6xl mx-auto px-4">
@@ -38,14 +47,20 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#features" className="text-gray-400 hover:text-white transition-colors">
+                <button
+                  onClick={handleScroll('features')}
+                  className="text-gray-400 hover:text-white transition-colors text-left"
+                >
                   Features
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#testimonials" className="text-gray-400 hover:text-white transition-colors">
+                <button
+                  onClick={handleScroll('testimonials')}
+                  className="text-gray-400 hover:text-white transition-colors text-left"
+                >
                   Success Stories
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -55,7 +70,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold text-orange-400">Get in Touch</h4>
             <div className="flex items-center gap-2 text-sm text-gray-400">
               <Mail className="h-4 w-4" />
-              <span>support@45daychallenge.com</span>
+              <span>contact@dipnerreddy.in</span>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">
               Questions about the challenge? Need technical support? We're here to help you succeed.
@@ -66,12 +81,18 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-gray-400">
-            © 2024 45-Day Challenge. All rights reserved.
+            © {currentYear} 45-Day Challenge. All rights reserved.
           </div>
           <div className="flex gap-6 text-xs text-gray-500">
-            <a href="#privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</a>
-            <a href="#terms" className="hover:text-gray-400 transition-colors">Terms of Service</a>
-            <a href="#cookies" className="hover:text-gray-400 transition-colors">Cookie Policy</a>
+            <button onClick={handleScroll('privacy')} className="hover:text-gray-400 transition-colors">
+              Privacy Policy
+            </button>
+            <button onClick={handleScroll('terms')} className="hover:text-gray-400 transition-colors">
+              Terms of Service
+            </button>
+            <button onClick={handleScroll('cookies')} className="hover:text-gray-400 transition-colors">
+              Cookie Policy
+            </button>
           </div>
         </div>
       </div>

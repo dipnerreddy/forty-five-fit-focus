@@ -4,7 +4,7 @@ import { Zap, Shield, Trophy } from 'lucide-react';
 
 const WhySection = () => {
   return (
-    <div className="py-16 sm:py-24 bg-gradient-to-r from-gray-900 to-black text-white">
+    <div className="py-16 sm:py-24 bg-gradient-to-r from-gray-900 to-black text-white" id='features'>
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-5xl font-black mb-6">
