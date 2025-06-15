@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ResetPassword from "./pages/ResetPassword";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 
@@ -55,6 +56,11 @@ const App = () => {
                 <Route path="/signup" element={
                   <PublicRoute>
                     <Signup />
+                  </PublicRoute>
+                } />
+                <Route path="/reset-password" element={
+                  <PublicRoute>
+                    <ResetPassword />
                   </PublicRoute>
                 } />
                 
