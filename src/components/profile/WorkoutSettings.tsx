@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface WorkoutSettingsProps {
-  routine: 'Home' | 'Gym' | 'Custom'; // <-- changed here
+  routine: 'Home' | 'Gym' | 'Custom';
   currentDay: number;
   streak: number;
   onRoutineChange: () => void;

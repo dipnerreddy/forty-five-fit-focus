@@ -2,12 +2,12 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Dumbbell, Home } from 'lucide-react';
+import { Target, Dumbbell, Home, Settings } from 'lucide-react';
 
 interface WorkoutDetailsCardProps {
   dayTitle: string;
   dayFocus: string;
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom';
 }
 
 const WorkoutDetailsCard = ({ dayTitle, dayFocus, routine }: WorkoutDetailsCardProps) => {
@@ -19,8 +19,10 @@ const WorkoutDetailsCard = ({ dayTitle, dayFocus, routine }: WorkoutDetailsCardP
             <Target className="h-5 w-5" />
             <h2 className="text-xl font-bold">{dayTitle}</h2>
           </div>
-          <Badge variant="secondary" className="bg-white/20 text-white border-0">
-            {routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> : <Home className="h-4 w-4 mr-1" />}
+          <Badge variant="secondary" className="bg-white/20 text-white border-0 flex items-center">
+            {routine === 'Gym' ? <Dumbbell className="h-4 w-4 mr-1" /> 
+              : routine === 'Custom' ? <Settings className="h-4 w-4 mr-1" />
+              : <Home className="h-4 w-4 mr-1" />}
             {routine}
           </Badge>
         </div>
