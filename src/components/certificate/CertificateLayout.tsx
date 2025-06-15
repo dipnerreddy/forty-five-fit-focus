@@ -1,6 +1,10 @@
-
 import React, { RefObject } from "react";
 import { Flame } from "lucide-react";
+
+// Helper to split string into array (preserve dashes and spaces)
+function verticalTextChars(str: string): string[] {
+  return str.split("");
+}
 
 interface CertificateLayoutProps {
   certificateRef: RefObject<HTMLDivElement>;
@@ -112,7 +116,7 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
     );
   }
 
-  // Default: Desktop layout (responsive, looks best in PDF/export)
+  // ----------- Desktop layout: fix PDF vertical text issue -------------
   return (
     <div
       ref={certificateRef}
@@ -125,7 +129,7 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
         hidden sm:flex
       "
     >
-      {/* Vertical orange bar on the left */}
+      {/* Vertical orange bar on the left (PDF compatible vertical text) */}
       <div
         className="
           bg-orange-500 flex flex-col items-center justify-between
@@ -134,13 +138,27 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
         "
       >
         <Flame className="text-white mb-3" size={26} />
+        {/* Stacked vertical characters: PDF-compatible */}
         <span
           className="
             text-[10px] text-white font-bold tracking-[0.16em]
-            [writing-mode:vertical-rl] rotate-180
             leading-4 uppercase select-none"
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 0, marginBottom: 0 }}
         >
-          45-DAY CHALLENGE
+          {verticalTextChars("45-DAY CHALLENGE").map((char, idx) => (
+            <span
+              key={idx}
+              style={{
+                display: 'block',
+                margin: char === " " ? "0.26em" : "0.04em",
+                opacity: char === " " ? 0 : 1, // Blank for spaces
+                height: "1em",
+                width: "auto",
+              }}
+            >
+              {char}
+            </span>
+          ))}
         </span>
       </div>
       {/* Certificate main info */}
@@ -225,4 +243,3 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
 };
 
 export default CertificateLayout;
-
