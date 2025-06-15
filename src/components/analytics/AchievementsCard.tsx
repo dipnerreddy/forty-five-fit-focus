@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Trophy } from 'lucide-react';
 import { useAchievements } from '@/hooks/useAchievements';
 
@@ -10,66 +8,63 @@ const AchievementsCard = () => {
 
   if (isLoading) {
     return (
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">🏆 Achievements</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="text-center py-4">Loading...</div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (userAchievements.length === 0) {
-    return (
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">🏆 Achievements</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="text-center py-8">
-            <Trophy className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">No achievements earned yet</p>
-            <p className="text-gray-400 text-xs mt-1">Keep working out to unlock badges!</p>
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-24 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-16 bg-gray-100 rounded-xl"></div>
+            <div className="h-16 bg-gray-100 rounded-xl"></div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="border-0 shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          🏆 Achievements
-          <Badge variant="secondary">{userAchievements.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="grid grid-cols-2 gap-3">
-          {userAchievements.map((achievement) => (
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-amber-50 rounded-xl">
+          <Trophy className="h-5 w-5 text-amber-600" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900">Achievements</h3>
+          <p className="text-sm text-gray-500">{userAchievements.length} earned</p>
+        </div>
+      </div>
+
+      {userAchievements.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="p-4 bg-gray-50 rounded-2xl w-fit mx-auto mb-4">
+            <Trophy className="h-8 w-8 text-gray-300" />
+          </div>
+          <p className="text-gray-500 text-sm">No achievements yet</p>
+          <p className="text-gray-400 text-xs mt-1">Keep working out to unlock badges!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {userAchievements.slice(0, 3).map((achievement) => (
             <div
               key={achievement.id}
-              className="p-3 rounded-lg border border-orange-200 bg-orange-50"
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100"
             >
-              <div className="text-center">
-                <div className="text-2xl mb-1">{achievement.icon}</div>
-                <div className="text-xs font-medium text-gray-900">
-                  {achievement.name}
-                </div>
-                <div className="text-xs text-gray-600">
-                  {achievement.description}
-                </div>
-                <Badge className="mt-1 text-xs bg-orange-500">
-                  Earned!
-                </Badge>
+              <div className="text-2xl">{achievement.icon}</div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 text-sm">{achievement.name}</p>
+                <p className="text-xs text-gray-600">{achievement.description}</p>
+              </div>
+              <div className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                Earned
               </div>
             </div>
           ))}
+          {userAchievements.length > 3 && (
+            <div className="text-center pt-2">
+              <p className="text-sm text-gray-500">+{userAchievements.length - 3} more achievements</p>
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
 

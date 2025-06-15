@@ -1,42 +1,48 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity } from 'lucide-react';
 
 const WorkoutIntensityCard = () => {
+  // Mock data for demonstration
+  const intensityData = [
+    { day: 1, intensity: 7 },
+    { day: 2, intensity: 8 },
+    { day: 3, intensity: 6 },
+    { day: 4, intensity: 9 },
+    { day: 5, intensity: 7 },
+    { day: 6, intensity: 8 },
+    { day: 7, intensity: 6 },
+  ];
+
+  const averageIntensity = Math.round(intensityData.reduce((sum, item) => sum + item.intensity, 0) / intensityData.length);
+
   return (
-    <Card className="border-0 shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">💪 Workout Intensity</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Average Intensity</span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((level) => (
-                <div
-                  key={level}
-                  className={`w-3 h-3 rounded-full ${
-                    level <= 3 ? 'bg-orange-500' : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Perceived Exertion</span>
-            <span className="text-lg font-bold">7/10</span>
-          </div>
-          
-          <div className="text-center py-4">
-            <Activity className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-gray-500 text-xs">Complete workouts to see intensity data</p>
-          </div>
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-purple-50 rounded-xl">
+          <Activity className="h-5 w-5 text-purple-600" />
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <h3 className="font-semibold text-gray-900">Workout Intensity</h3>
+          <p className="text-sm text-gray-500">Last 7 days average: {averageIntensity}/10</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {intensityData.map((item) => (
+          <div key={item.day} className="flex items-center gap-3">
+            <span className="text-sm text-gray-500 w-12">Day {item.day}</span>
+            <div className="flex-1 bg-gray-100 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(item.intensity / 10) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium text-gray-700 w-8">{item.intensity}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
