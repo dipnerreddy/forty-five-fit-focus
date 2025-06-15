@@ -46,34 +46,37 @@ const VerifyCertificate: React.FC = () => {
     "inline-flex items-center gap-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 shadow-sm";
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center p-4 ${cardBg}`}>
-      <Card className="max-w-3xl w-full mx-auto rounded-2xl shadow-2xl border-0 overflow-hidden">
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center px-2 py-4 sm:p-4 ${cardBg}`}
+      style={{ minHeight: "100dvh" }} // For mobile viewport support
+    >
+      <Card className="w-full max-w-xl mx-auto rounded-2xl shadow-2xl border-0 overflow-hidden">
         <CardContent className="p-0 md:p-0">
           {showCertificate ? (
             <div className={fadeIn}>
-              <div className="flex flex-col items-center bg-gradient-to-b from-green-50/70 to-white py-8 px-4 border-b">
-                <span className={badgeClass}>
+              <div className="flex flex-col items-center bg-gradient-to-b from-green-50/70 to-white py-6 px-2 sm:px-4 border-b">
+                <span className={badgeClass + " mb-3"}>
                   <CheckCircle className="w-4 h-4 text-green-600" />
                   Certificate Verified
                 </span>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-green-800 mt-3 mb-2 tracking-tight flex items-center">
-                  <span className="mr-2">Congratulations!</span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-green-800 mb-2 tracking-tight flex items-center text-center">
+                  <span className="mr-1">Congratulations!</span>
                   <span role="img" aria-label="confetti" className="text-2xl">🎉</span>
                 </h2>
-                <p className="text-green-700 max-w-xl mx-auto text-base mb-4">
+                <p className="text-green-700 mx-auto text-sm sm:text-base mb-3 text-center max-w-sm sm:max-w-xl">
                   This certificate is an <b>official record of completion</b> for the <span className="font-bold">{parsed.challenge}</span>.
                   The credential is <span className="text-green-800 font-semibold">valid</span> and issued in <b>{parsed.year}</b>.
                 </p>
-                <div className="flex flex-wrap items-center gap-3 justify-center my-2">
-                  <div className="flex items-center gap-1 px-3 py-1 bg-white/60 rounded shadow-sm border border-green-100">
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full max-w-xs sm:max-w-full justify-center my-2">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-white/60 rounded shadow-sm border border-green-100 w-full sm:w-auto justify-center">
                     <span className="font-semibold text-gray-500 text-xs">Credential ID:</span>
-                    <span className="font-mono text-green-700 text-xs">{credentialId}</span>
+                    <span className="font-mono text-green-700 text-xs break-all">{credentialId}</span>
                   </div>
                   <a
                     href={credentialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex gap-1 items-center px-3 py-1 border bg-blue-50 hover:bg-blue-100 rounded transition text-blue-700 text-xs font-medium"
+                    className="flex gap-1 items-center px-2 py-1 border bg-blue-50 hover:bg-blue-100 rounded transition text-blue-700 text-xs font-medium w-full sm:w-auto justify-center"
                   >
                     <LinkIcon className="w-3 h-3" />
                     Verification Link
@@ -81,48 +84,49 @@ const VerifyCertificate: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 px-2 md:px-6 py-8 flex flex-col gap-3">
-                <h3 className="text-lg text-gray-700 font-semibold mb-2 text-center">
+              <div className="bg-white dark:bg-slate-900 px-1 xs:px-2 sm:px-6 py-6 flex flex-col gap-2">
+                <h3 className="text-base sm:text-lg text-gray-700 font-semibold mb-1 text-center">
                   Original Certificate
                 </h3>
-                <div className="mb-6 flex items-center justify-center">
-                  <div className="w-full max-w-3xl">
-                    <CertificateLayout
-                      certificateRef={certificateRef}
-                      name={name}
-                      routine={routine}
-                      date={`Year: ${parsed.year}`}
-                      streak={streak}
-                      credentialId={parsed.credentialId}
-                      credentialUrl={credentialUrl}
-                      onCopyCredentialUrl={() => {
-                        navigator.clipboard.writeText(credentialUrl);
-                      }}
-                    />
+                <div className="mb-5 flex items-center justify-center">
+                  <div className="w-full max-w-full overflow-x-auto">
+                    {/* Provide a responsive certificate view with horizontal scroll for small screens */}
+                    <div className="min-w-[320px] max-w-xl mx-auto">
+                      <CertificateLayout
+                        certificateRef={certificateRef}
+                        name={name}
+                        routine={routine}
+                        date={`Year: ${parsed.year}`}
+                        streak={streak}
+                        credentialId={parsed.credentialId}
+                        credentialUrl={credentialUrl}
+                        onCopyCredentialUrl={() => {
+                          navigator.clipboard.writeText(credentialUrl);
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-center mt-2">
-                  <Button asChild variant="secondary">
-                    <Link to="/">
-                      Back to Home
-                    </Link>
+                  <Button asChild variant="secondary" size="lg" className="w-full sm:w-auto text-base">
+                    <Link to="/">Back to Home</Link>
                   </Button>
                 </div>
               </div>
             </div>
           ) : (
-            <div className={`${fadeIn} flex flex-col items-center py-16 px-6`}>
-              <span className={invalidBadgeClass}>
+            <div className={`${fadeIn} flex flex-col items-center py-10 px-2`}>
+              <span className={invalidBadgeClass + " mb-3"}>
                 <XCircle className="w-4 h-4 text-red-400" />
                 Invalid Certificate
               </span>
-              <h2 className="text-2xl font-bold text-red-700 mt-3 mb-2">Invalid or Not Found</h2>
-              <p className="text-gray-600 mb-4 max-w-md text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-red-700 mb-2 text-center">Invalid or Not Found</h2>
+              <p className="text-gray-600 mb-4 max-w-xs sm:max-w-md text-center text-sm sm:text-base">
                 The certificate you are trying to verify could not be found or the ID is incorrect.
                 <br />
                 Please check your link or contact support for help.
               </p>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto text-base">
                 <Link to="/">Back to Home</Link>
               </Button>
             </div>
