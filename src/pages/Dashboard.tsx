@@ -15,6 +15,7 @@ import EmptyWorkoutCard from '@/components/dashboard/EmptyWorkoutCard';
 import MotivationCard from '@/components/dashboard/MotivationCard';
 import BottomNavigation from '@/components/dashboard/BottomNavigation';
 import CompletionReviewForm from '@/components/dashboard/CompletionReviewForm';
+import type { UserProfile } from '@/types/UserProfile';
 
 const Dashboard = () => {
   const { toast } = useToast();
