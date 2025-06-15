@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          badge_color: string
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Insert: {
+          badge_color?: string
+          category: string
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Update: {
+          badge_color?: string
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
+      body_measurements: {
+        Row: {
+          id: string
+          measured_at: string
+          measurement_type: string
+          unit: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          measured_at?: string
+          measurement_type: string
+          unit?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          id?: string
+          measured_at?: string
+          measurement_type?: string
+          unit?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       daily_completions: {
         Row: {
           completed_at: string
@@ -120,6 +183,62 @@ export type Database = {
         }
         Relationships: []
       }
+      progress_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          day_number: number
+          id: string
+          photo_url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          day_number: number
+          id?: string
+          photo_url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          day_number?: number
+          id?: string
+          photo_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_reviews: {
         Row: {
           created_at: string
@@ -146,6 +265,36 @@ export type Database = {
           newsletter_signup?: boolean
           rating?: number
           review_text?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workout_intensity: {
+        Row: {
+          created_at: string
+          day: number
+          difficulty_rating: number | null
+          id: string
+          notes: string | null
+          perceived_exertion: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: number
+          difficulty_rating?: number | null
+          id?: string
+          notes?: string | null
+          perceived_exertion?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: number
+          difficulty_rating?: number | null
+          id?: string
+          notes?: string | null
+          perceived_exertion?: number | null
           user_id?: string
         }
         Relationships: []
@@ -262,6 +411,10 @@ export type Database = {
       can_complete_workout_today: {
         Args: { user_uuid: string }
         Returns: boolean
+      }
+      check_and_award_achievements: {
+        Args: { user_uuid: string }
+        Returns: undefined
       }
       get_current_workout_window: {
         Args: Record<PropertyKey, never>
