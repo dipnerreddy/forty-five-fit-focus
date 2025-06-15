@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { customStorage } from '@/utils/sessionStorage';
 import { Flame, ArrowLeft } from 'lucide-react';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
 import EmailInput from '@/components/auth/EmailInput';
@@ -67,6 +69,12 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      // Set storage type based on remember me checkbox
+      // true = use sessionStorage (session only), false = use localStorage (persistent)
+      customStorage.setStorageType(!rememberMe);
+      
+      console.log('Remember me:', rememberMe, 'Using storage:', rememberMe ? 'localStorage (persistent)' : 'sessionStorage (session only)');
+
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -97,7 +105,9 @@ const Login = () => {
 
       toast({
         title: "Welcome back!",
-        description: "Your journey continues."
+        description: rememberMe 
+          ? "You'll stay signed in for 30 days." 
+          : "You'll stay signed in until you close the browser."
       });
       
       // Navigate to dashboard on successful login
@@ -171,18 +181,25 @@ const Login = () => {
                 />
 
                 {/* Remember Me */}
-                <div className="flex items-center space-x-2">
-                  <input
+                <div className="flex items-center space-x-3">
+                  <Checkbox
                     id="remember"
-                    type="checkbox"
                     checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                     disabled={isLoading}
-                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                    className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                   />
-                  <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
-                    Keep me signed in
-                  </label>
+                  <div className="space-y-1">
+                    <label htmlFor="remember" className="text-sm font-medium text-gray-700 cursor-pointer">
+                      Keep me signed in
+                    </label>
+                    <p className="text-xs text-gray-500">
+                      {rememberMe 
+                        ? "Stay signed in for 30 days across browser sessions" 
+                        : "Only stay signed in until you close this browser"
+                      }
+                    </p>
+                  </div>
                 </div>
                 
                 <Button 
