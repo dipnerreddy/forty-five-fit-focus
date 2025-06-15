@@ -1,12 +1,13 @@
 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import type { RoutineType } from '@/types/UserProfile';
 
 interface User {
   name: string;
   currentDay: number;
   streak: number;
-  routine: 'Home' | 'Gym';
+  routine: RoutineType; // Accepts 'Home' | 'Gym' | 'Custom'
 }
 
 interface UseWorkoutCompletionProps {
