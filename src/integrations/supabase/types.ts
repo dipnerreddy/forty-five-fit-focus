@@ -248,7 +248,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          name: string | null
+          rank: number | null
+          routine: string | null
+          streak: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_complete_workout_today: {

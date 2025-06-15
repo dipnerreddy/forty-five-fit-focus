@@ -3,6 +3,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+interface LeaderboardEntry {
+  name: string;
+  streak: number;
+  routine: string;
+  rank: number;
+}
+
 interface AnalyticsData {
   totalDays: number;
   currentStreak: number;
@@ -20,6 +27,7 @@ interface AnalyticsData {
     days_completed: number;
     streak_achieved: number;
   }>;
+  leaderboard: LeaderboardEntry[];
 }
 
 export const useAnalytics = () => {
@@ -31,7 +39,8 @@ export const useAnalytics = () => {
     longestStreak: 0,
     completionRate: 0,
     recentCompletions: [],
-    workoutSessions: []
+    workoutSessions: [],
+    leaderboard: []
   });
 
   useEffect(() => {
@@ -64,6 +73,11 @@ export const useAnalytics = () => {
           .eq('user_id', session.user.id)
           .order('day', { ascending: false })
           .limit(10);
+
+        // Fetch leaderboard data
+        const { data: leaderboard } = await supabase
+          .from('leaderboard')
+          .select('*');
 
         if (profile && workoutSessions) {
           // Calculate total days since signup (login days)
@@ -101,7 +115,8 @@ export const useAnalytics = () => {
             longestStreak,
             completionRate: Math.min(currentRoutineCompletionRate, 100), // Cap at 100%
             recentCompletions: completionsWithRoutine,
-            workoutSessions: workoutSessions || []
+            workoutSessions: workoutSessions || [],
+            leaderboard: leaderboard || []
           });
         }
       } catch (error) {

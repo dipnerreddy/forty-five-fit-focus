@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AnalyticsHeader from '@/components/analytics/AnalyticsHeader';
 import StatsGrid from '@/components/analytics/StatsGrid';
+import LeaderboardCard from '@/components/analytics/LeaderboardCard';
 import WorkoutSessionsCard from '@/components/analytics/WorkoutSessionsCard';
 import RecentCompletionsCard from '@/components/analytics/RecentCompletionsCard';
 
@@ -31,6 +32,8 @@ const Analytics = () => {
           completionRate={analytics.completionRate}
           longestStreak={analytics.longestStreak}
         />
+
+        <LeaderboardCard leaderboard={analytics.leaderboard} />
 
         <WorkoutSessionsCard workoutSessions={analytics.workoutSessions} />
 
