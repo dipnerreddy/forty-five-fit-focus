@@ -25,7 +25,8 @@ interface UserProfile {
 const Certificate = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const certificateRef = useRef<HTMLDivElement>(null);
+  const certificateDesktopRef = useRef<HTMLDivElement>(null);
+  const certificateMobileRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -79,14 +80,13 @@ const Certificate = () => {
   }, [navigate, toast]);
 
   const handleDownloadPdf = () => {
-    if (!certificateRef.current || !profile) return;
-    
-    html2canvas(certificateRef.current, { scale: 3, useCORS: true, backgroundColor: null }).then((canvas) => {
+    if (!certificateDesktopRef.current || !profile) return;
+    // Always render/print the desktop version for PDF no matter device
+    html2canvas(certificateDesktopRef.current, { scale: 3, useCORS: true, backgroundColor: null }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`45-Day-Fitness-Challenge-Certificate-${profile.name.replace(/\s+/g, '-')}.pdf`);
-      
       toast({
         title: "Certificate Downloaded!",
         description: "Your certificate has been saved as a PDF.",
@@ -156,8 +156,9 @@ const Certificate = () => {
           Back to Profile
         </Button>
         
+        {/* Desktop layout (hidden on mobile but always in DOM for PDF export) */}
         <CertificateLayout
-          certificateRef={certificateRef}
+          certificateRef={certificateDesktopRef}
           name={profile.name}
           routine={profile.routine}
           date={currentDate}
@@ -165,6 +166,19 @@ const Certificate = () => {
           credentialId={credentialId}
           credentialUrl={credentialUrl}
           onCopyCredentialUrl={copyCredentialUrl}
+          variant="desktop"
+        />
+        {/* Mobile layout (visible only on mobile, not rendered in PDF) */}
+        <CertificateLayout
+          certificateRef={certificateMobileRef}
+          name={profile.name}
+          routine={profile.routine}
+          date={currentDate}
+          streak={profile.streak}
+          credentialId={credentialId}
+          credentialUrl={credentialUrl}
+          onCopyCredentialUrl={copyCredentialUrl}
+          variant="mobile"
         />
 
         <CredentialInfoCard
