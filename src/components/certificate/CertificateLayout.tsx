@@ -1,5 +1,6 @@
+
 import React, { RefObject } from "react";
-import { Flame } from "lucide-react";
+import { Flame, CheckCircle } from "lucide-react";
 
 // Helper to split string into array (preserve dashes and spaces)
 function verticalTextChars(str: string): string[] {
@@ -116,33 +117,24 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
     );
   }
 
-  // ----------- Desktop layout: fix PDF vertical text issue -------------
+  // ----------- Desktop layout: Updated with new professional style -------------
   return (
     <div
       ref={certificateRef}
       className="
-        relative flex flex-row w-full max-w-xl rounded-lg sm:rounded-xl
-        shadow-lg overflow-hidden bg-white
-        border border-gray-100 mx-auto 
-        min-h-[300px] sm:min-h-[320px]
+        relative aspect-[1.414/1] w-full flex bg-white shadow-2xl rounded-lg overflow-hidden
+        mx-auto 
         animate-fade-in
         hidden sm:flex
       "
     >
       {/* Vertical orange bar on the left (PDF compatible vertical text) */}
-      <div
-        className="
-          bg-orange-500 flex flex-col items-center justify-between
-          px-2 py-3
-          min-w-[42px]
-        "
-      >
-        <Flame className="text-white mb-3" size={26} />
+      <div className="w-24 bg-orange-500 flex flex-col items-center justify-between p-6">
+        <Flame className="h-12 w-12 text-white" />
         {/* Stacked vertical characters: PDF-compatible */}
         <span
           className="
-            text-[10px] text-white font-bold tracking-[0.16em]
-            leading-4 uppercase select-none"
+            text-white font-semibold tracking-widest select-none"
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 0, marginBottom: 0 }}
         >
           {verticalTextChars("45-DAY CHALLENGE").map((char, idx) => (
@@ -150,7 +142,7 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
               key={idx}
               style={{
                 display: 'block',
-                margin: char === " " ? "0.26em" : "0.04em",
+                margin: char === " " ? "0.3em" : "0.05em",
                 opacity: char === " " ? 0 : 1, // Blank for spaces
                 height: "1em",
                 width: "auto",
@@ -161,80 +153,51 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
           ))}
         </span>
       </div>
-      {/* Certificate main info */}
-      <div
-        className="
-          flex-1 flex flex-col
-          justify-between
-          bg-white
-          px-4 py-4 sm:px-8 sm:py-8
-          gap-2 sm:gap-4
-        "
-      >
-        {/* Headings */}
-        <div className="mt-0">
-          <div className="uppercase text-[12px] sm:text-sm tracking-wider text-gray-400 font-semibold mb-1">
-            Certificate of Achievement
-          </div>
-          <div className="font-extrabold text-lg sm:text-2xl text-gray-800 mb-1 leading-5 sm:leading-7">
-            Official Completion Record
-          </div>
-          <div className="text-gray-500 text-xs sm:text-base mb-1">
-            This certificate is proudly presented to
-          </div>
-          {/* Main Name */}
-          <div
-            className="
-              text-lg sm:text-5xl font-black text-gray-900
-              my-2 break-words
-              leading-tight sm:leading-tight
-              whitespace-normal
-              mobile-certificate-name
-              "
-            style={{
-              letterSpacing: "0.05em",
-              wordBreak: "break-word",
-            }}
-          >
-            {name || <span className="text-gray-400 font-normal">...</span>}
-          </div>
+      
+      {/* Certificate main content */}
+      <div className="flex-1 p-12 flex flex-col">
+        {/* Header */}
+        <div>
+          <p className="text-sm font-semibold text-gray-400 tracking-widest">CERTIFICATE OF ACHIEVEMENT</p>
+          <h1 className="text-2xl font-bold text-gray-800">Official Completion Record</h1>
         </div>
-        {/* Details section */}
-        <div className="mt-2 sm:mt-5 mb-2">
-          <div className="text-xs sm:text-base text-gray-700">
-            For the successful completion of&nbsp;
-            <span className="font-semibold">45-Day Fitness Challenge</span>
-            &nbsp;on the <span className="font-semibold">{routine}</span> Routine.
-          </div>
-          <div className="flex flex-row gap-6 mt-2">
+        
+        {/* Spacer */}
+        <div className="flex-grow" />
+        
+        {/* Main content */}
+        <div>
+          <p className="text-lg text-gray-500">This certificate is proudly presented to</p>
+          <p className="text-7xl font-black text-gray-900 leading-tight break-words">
+            {name || <span className="text-gray-400 font-normal">...</span>}
+          </p>
+          <p className="text-lg text-gray-600 pt-2">
+            For the successful completion of the 
+            <span className="font-bold"> 45-Day Fitness Challenge </span> 
+            on the <span className="font-bold">{routine} Routine</span>.
+          </p>
+        </div>
+        
+        {/* Spacer */}
+        <div className="flex-grow" />
+        
+        {/* Footer */}
+        <div className="flex justify-between items-end border-t pt-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-8 w-8 text-green-500" />
             <div>
-              <span className="block text-[10px] sm:text-xs font-medium text-slate-500">
-                Date
-              </span>
-              <span className="block text-base font-semibold text-slate-900">
-                {date}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[10px] sm:text-xs font-medium text-slate-500">
-                Streak
-              </span>
-              <span className="block text-base font-semibold text-slate-900">
-                {streak} Days
-              </span>
+              <p className="font-bold">{date}</p>
+              <p className="text-sm text-gray-500">Date of Completion</p>
             </div>
           </div>
-          {/* Credential details + verification link */}
-          <div className="mt-3 flex flex-col gap-1">
-            <span className="font-mono text-xs text-slate-400 break-all">
-              Credential ID: <span className="text-slate-800">{credentialId}</span>
-            </span>
-            <span
-              className="text-xs text-blue-600 underline cursor-pointer break-all"
+          <div className="text-right text-xs text-gray-400">
+            <p>Credential ID: {credentialId}</p>
+            <p 
+              className="cursor-pointer hover:text-blue-600"
               onClick={onCopyCredentialUrl}
             >
-              {credentialUrl.replace(/^https?:\/\//, "")}
-            </span>
+              Credential URL: {credentialUrl.replace(/^https?:\/\//, "")}
+            </p>
           </div>
         </div>
       </div>
