@@ -50,26 +50,29 @@ const Analytics = () => {
 
           {/* Progress Tracking */}
           <section>
-            <div className="mb-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-2">Progress</h2>
-              <p className="text-sm text-gray-500">Track your transformation</p>
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Progress</h2>
+              <p className="text-gray-500">Track your transformation</p>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-8">
               <ProgressPhotosCard />
-              <WorkoutIntensityCard />
+              <WorkoutIntensityCard 
+                totalDays={analytics.totalDays}
+                recentCompletions={analytics.recentCompletions}
+              />
             </div>
           </section>
 
-          {/* Community & History */}
+          {/* Activity & History */}
           <section>
-            <div className="mb-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-2">Community</h2>
-              <p className="text-sm text-gray-500">See how you compare</p>
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Activity</h2>
+              <p className="text-gray-500">Your workout journey</p>
             </div>
-            <div className="space-y-6">
-              <LeaderboardCard leaderboard={analytics.leaderboard} />
-              <WorkoutSessionsCard workoutSessions={analytics.workoutSessions} />
+            <div className="space-y-8">
               <RecentCompletionsCard recentCompletions={analytics.recentCompletions} />
+              <WorkoutSessionsCard workoutSessions={analytics.workoutSessions} />
+              <LeaderboardCard leaderboard={analytics.leaderboard} />
             </div>
           </section>
         </div>
