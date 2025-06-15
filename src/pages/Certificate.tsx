@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Download, Share2, Flame, CheckCircle, Linkedin, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Download, Share2, Flame, CheckCircle, Linkedin, MessageCircle, ExternalLink, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -16,6 +15,7 @@ interface UserProfile {
   name: string;
   streak: number;
   routine: 'Home' | 'Gym';
+  user_id?: string;
 }
 
 const Certificate = () => {
@@ -37,7 +37,7 @@ const Certificate = () => {
 
         const { data: profileData, error } = await supabase
           .from('profiles')
-          .select('name, streak, routine')
+          .select('name, streak, routine, user_id')
           .eq('user_id', session.user.id)
           .single();
 
@@ -47,7 +47,6 @@ const Certificate = () => {
         }
 
         if (profileData) {
-          // Check if user has earned the certificate
           if (profileData.streak < 45) {
             toast({
               title: "Certificate Locked",
@@ -61,7 +60,8 @@ const Certificate = () => {
           setProfile({
             name: profileData.name,
             streak: profileData.streak,
-            routine: profileData.routine as 'Home' | 'Gym'
+            routine: profileData.routine as 'Home' | 'Gym',
+            user_id: session.user.id
           });
         }
       } catch (error) {
@@ -81,7 +81,7 @@ const Certificate = () => {
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`45-Day-Challenge-Certificate-${profile.name}.pdf`);
+      pdf.save(`45-Day-Fitness-Challenge-Certificate-${profile.name.replace(/\s+/g, '-')}.pdf`);
       
       toast({
         title: "Certificate Downloaded!",
@@ -94,12 +94,19 @@ const Certificate = () => {
     setIsShareOpen(true);
   };
 
-  const copyToClipboard = () => {
-    const credentialUrl = `${window.location.origin}/certificate`;
+  const copyCredentialUrl = () => {
     navigator.clipboard.writeText(credentialUrl);
     toast({ 
-      title: "URL Copied!",
-      description: "Certificate URL has been copied to clipboard."
+      title: "Credential URL Copied!",
+      description: "Certificate verification URL has been copied to clipboard."
+    });
+  };
+
+  const copyCredentialId = () => {
+    navigator.clipboard.writeText(credentialId);
+    toast({ 
+      title: "Credential ID Copied!",
+      description: "Credential ID has been copied to clipboard."
     });
   };
 
@@ -125,8 +132,13 @@ const Certificate = () => {
     day: 'numeric'
   });
 
-  const credentialId = `FC-${profile.name.replace(/\s+/g, '')}-${Date.now().toString().slice(-6)}`;
-  const credentialUrl = `${window.location.origin}/certificate`;
+  // Enhanced credential system
+  const credentialId = `FC45-${profile.name.replace(/\s+/g, '').toUpperCase()}-${profile.user_id?.substring(0, 8).toUpperCase()}-${new Date().getFullYear()}`;
+  const credentialUrl = `${window.location.origin}/verify/${credentialId}`;
+  
+  // Enhanced LinkedIn sharing
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(credentialUrl)}`;
+  const linkedInAddToProfileUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent('45-Day Fitness Challenge Completion')}&organizationName=${encodeURIComponent('Fitness Challenge App')}&issueYear=${new Date().getFullYear()}&issueMonth=${new Date().getMonth() + 1}&certUrl=${encodeURIComponent(credentialUrl)}&certId=${encodeURIComponent(credentialId)}`;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 font-sans">
@@ -174,12 +186,48 @@ const Certificate = () => {
                 </div>
               </div>
               <div className="text-right text-xs text-gray-400">
-                <p>Credential ID: {credentialId}</p>
+                <p className="font-mono">Credential ID: {credentialId}</p>
                 <p>Streak: {profile.streak} Days</p>
+                <p className="text-blue-600 hover:text-blue-800 cursor-pointer" onClick={copyCredentialUrl}>
+                  🔗 Verify at: {credentialUrl.replace('https://', '')}
+                </p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Enhanced Credential Information Card */}
+        <Card className="mt-6 border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5" />
+              Official Credential Information
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-blue-700">Credential ID</Label>
+                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border">
+                  <code className="flex-1 text-sm font-mono text-gray-800">{credentialId}</code>
+                  <Button size="sm" variant="outline" onClick={copyCredentialId}>
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-blue-700">Verification URL</Label>
+                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border">
+                  <code className="flex-1 text-sm font-mono text-gray-800 truncate">{credentialUrl}</code>
+                  <Button size="sm" variant="outline" onClick={copyCredentialUrl}>
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-blue-600 mt-3">
+              💡 Use this credential information when adding this certification to your LinkedIn profile or resume.
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={handleDownloadPdf} size="lg" className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600">
@@ -188,45 +236,73 @@ const Certificate = () => {
           <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="lg" className="w-full sm:w-auto border-orange-500 text-orange-600 hover:bg-orange-50">
-                <Share2 className="mr-2 h-4 w-4" /> Share
+                <Share2 className="mr-2 h-4 w-4" /> Share & Add to Profile
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Share Your Achievement</DialogTitle>
                 <DialogDescription>
-                  Share your 45-day fitness challenge completion with others!
+                  Add this certification to your professional profiles and share your accomplishment!
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="credentialUrl">Certificate URL</Label>
-                  <div className="flex items-center gap-2">
-                    <Input id="credentialUrl" value={credentialUrl} readOnly />
-                    <Button onClick={copyToClipboard}>Copy</Button>
+                {/* LinkedIn Professional Options */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">LinkedIn</h4>
+                  <div className="space-y-2">
+                    <a 
+                      href={linkedInAddToProfileUrl}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="w-full"
+                    >
+                      <Button variant="outline" className="w-full justify-start">
+                        <Linkedin className="mr-2 h-4 w-4 text-blue-600" /> 
+                        Add to LinkedIn Profile
+                      </Button>
+                    </a>
+                    <a 
+                      href={linkedInShareUrl}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="w-full"
+                    >
+                      <Button variant="outline" className="w-full justify-start">
+                        <Share2 className="mr-2 h-4 w-4 text-blue-600" /> 
+                        Share on LinkedIn
+                      </Button>
+                    </a>
                   </div>
                 </div>
-                <div className="flex gap-4">
+
+                {/* Other Sharing Options */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Other Platforms</h4>
                   <a 
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(credentialUrl)}`} 
+                    href={`https://api.whatsapp.com/send?text=I%20just%20completed%20the%2045-Day%20Fitness%20Challenge!%20🏆%0A%0ACredential%20ID:%20${encodeURIComponent(credentialId)}%0AVerify:%20${encodeURIComponent(credentialUrl)}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="w-full"
                   >
-                    <Button variant="outline" className="w-full">
-                      <Linkedin className="mr-2 h-4 w-4" /> Share on LinkedIn
+                    <Button variant="outline" className="w-full justify-start">
+                      <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> 
+                      Share on WhatsApp
                     </Button>
                   </a>
-                  <a 
-                    href={`https://api.whatsapp.com/send?text=I%20just%20completed%20the%2045-Day%20Fitness%20Challenge!%20Check%20out%20my%20certificate:%20${encodeURIComponent(credentialUrl)}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="w-full"
-                  >
-                    <Button variant="outline" className="w-full">
-                      <MessageCircle className="mr-2 h-4 w-4" /> Share on WhatsApp
+                </div>
+
+                {/* Quick Copy Options */}
+                <div className="space-y-2 pt-2 border-t">
+                  <h4 className="font-medium text-gray-900 text-sm">Quick Copy</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button size="sm" variant="outline" onClick={copyCredentialId}>
+                      <Copy className="mr-1 h-3 w-3" /> Credential ID
                     </Button>
-                  </a>
+                    <Button size="sm" variant="outline" onClick={copyCredentialUrl}>
+                      <Copy className="mr-1 h-3 w-3" /> Verify URL
+                    </Button>
+                  </div>
                 </div>
               </div>
             </DialogContent>
@@ -240,7 +316,7 @@ const Certificate = () => {
             <p className="text-green-700 leading-relaxed">
               You've completed an incredible journey of discipline and self-improvement. 
               This certificate represents your dedication to becoming the best version of yourself. 
-              Keep up the amazing work and continue your fitness journey!
+              Add it to your LinkedIn profile to showcase your commitment to health and fitness!
             </p>
           </CardContent>
         </Card>
