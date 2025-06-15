@@ -58,7 +58,7 @@ const Signup = () => {
                   variant="outline" 
                   className="w-full h-12 border-2 border-orange-200 text-orange-600 hover:bg-orange-50 font-semibold rounded-lg transition-all duration-200 text-base"
                 >
-                  Sign In Instead
+                  LogIn Instead
                 </Button>
               </Link>
             </CardContent>
