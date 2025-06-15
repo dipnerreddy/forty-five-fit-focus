@@ -1,3 +1,4 @@
+
 import React from 'react';
 import HeroSection from '@/components/landing/HeroSection';
 import WhySection from '@/components/landing/WhySection';
@@ -15,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       <HeroSection />
-      <LiveVisitorCount />
+      {/* Removed the in-flow visitor count, now floating */}
       <WhySection />
       <TestimonialsSection />
       <CertificateSection />
@@ -23,6 +24,8 @@ const Index = () => {
       <ChallengeRulesSection />
       <FinalCTASection />
       <Footer />
+      {/* Floating component, always visible */}
+      <LiveVisitorCount />
     </div>
   );
 };
