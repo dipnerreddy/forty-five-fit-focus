@@ -15,34 +15,24 @@ interface Achievement {
 }
 
 export const useAchievements = () => {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [userAchievements, setUserAchievements] = useState<Achievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAchievements = async () => {
+    const fetchUserAchievements = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
-        // Fetch all achievements
-        const { data: allAchievements } = await supabase
-          .from('achievements')
-          .select('*')
-          .order('requirement_value');
-
-        // Fetch user's achievements
+        // Fetch only user's earned achievements
         const { data: userAchievementData } = await supabase
           .from('user_achievements')
           .select(`
             earned_at,
             achievements (*)
           `)
-          .eq('user_id', session.user.id);
-
-        if (allAchievements) {
-          setAchievements(allAchievements);
-        }
+          .eq('user_id', session.user.id)
+          .order('earned_at', { ascending: false });
 
         if (userAchievementData) {
           const earnedAchievements = userAchievementData.map(ua => ({
@@ -64,8 +54,8 @@ export const useAchievements = () => {
       }
     };
 
-    fetchAchievements();
+    fetchUserAchievements();
   }, []);
 
-  return { achievements, userAchievements, isLoading };
+  return { userAchievements, isLoading };
 };
