@@ -40,7 +40,12 @@ const Dashboard = () => {
     completedSets,
     totalSets,
     getCurrentActiveExercise
-  } = useWorkoutData(user.routine, user.currentDay, user.name, user.customSheetUrl);
+  } = useWorkoutData(
+    user.routine,
+    user.currentDay,
+    user.name,
+    user.customSheetUrl
+  );
 
   const { completeWorkout: handleCompleteWorkout } = useWorkoutCompletion({
     user,

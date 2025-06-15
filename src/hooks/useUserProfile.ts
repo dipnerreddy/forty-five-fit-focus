@@ -7,7 +7,8 @@ interface User {
   name: string;
   currentDay: number;
   streak: number;
-  routine: 'Home' | 'Gym';
+  routine: 'Home' | 'Gym' | 'Custom'; // <-- changed here
+  customSheetUrl?: string; // <-- added this property
 }
 
 export const useUserProfile = () => {
@@ -33,7 +34,7 @@ export const useUserProfile = () => {
 
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('name, current_day, streak, routine')
+          .select('name, current_day, streak, routine, custom_sheet_url') // <-- add custom_sheet_url
           .eq('user_id', session.user.id)
           .single();
 
@@ -47,7 +48,8 @@ export const useUserProfile = () => {
             name: profile.name,
             currentDay: profile.current_day,
             streak: profile.streak,
-            routine: profile.routine as 'Home' | 'Gym'
+            routine: profile.routine as 'Home' | 'Gym' | 'Custom',
+            customSheetUrl: profile.custom_sheet_url // <-- add this line
           };
           setUser(userData);
           

@@ -16,7 +16,7 @@ interface Exercise {
 interface CurrentExerciseCardProps {
   exercise: Exercise;
   category: 'Main' | 'Core';
-  routine: 'Home' | 'Gym' | 'Custom';
+  routine: 'Home' | 'Gym' | 'Custom'; // <-- changed here
   onSetChange: (setIndex: number, completed: boolean) => void;
   onWeightChange: (weight: number) => void;
 }

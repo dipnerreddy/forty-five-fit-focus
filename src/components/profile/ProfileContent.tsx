@@ -15,7 +15,7 @@ interface UserProfile {
   age: number;
   gender: string;
   weight: number;
-  routine: 'Home' | 'Gym' | 'Custom';
+  routine: 'Home' | 'Gym' | 'Custom'; // <-- changed here
   current_day: number;
   streak: number;
   email?: string;
