@@ -1,4 +1,3 @@
-
 export interface WorkoutExercise {
   name: string;
   sets: number;
@@ -52,6 +51,24 @@ function parseCSV(csvText: string): string[][] {
   return result;
 }
 
+// Helper function to normalize category names based on routine type
+function normalizeCategory(category: string, routine: 'Home' | 'Gym'): 'Main' | 'Core' {
+  const categoryLower = category.toLowerCase().trim();
+  
+  if (routine === 'Home') {
+    // Map Home workout categories
+    if (categoryLower === 'strength') return 'Main';
+    if (categoryLower === 'cardio') return 'Core';
+  }
+  
+  // For Gym workouts or fallback, use existing logic
+  if (categoryLower === 'main') return 'Main';
+  if (categoryLower === 'core') return 'Core';
+  
+  // Default fallback
+  return 'Main';
+}
+
 export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWorkout[]> {
   try {
     const url = routine === 'Home' ? HOME_WORKOUT_PLAN_URL : GYM_WORKOUT_PLAN_URL;
@@ -99,11 +116,14 @@ export async function fetchWorkoutPlan(routine: 'Home' | 'Gym'): Promise<DayWork
             dayWorkout.cardioNotes = cardioNotes;
           }
           
+          // Normalize the category based on routine type
+          const normalizedCategory = normalizeCategory(category, routine);
+          
           dayWorkout.exercises.push({
             name: exerciseName,
             sets,
             reps,
-            category: category as 'Main' | 'Core'
+            category: normalizedCategory
           });
         }
       }
