@@ -2,6 +2,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import EmailInput from '@/components/auth/EmailInput';
+import PasswordInput from '@/components/auth/PasswordInput';
 
 interface PersonalInfoSectionProps {
   formData: {
@@ -31,36 +33,35 @@ const PersonalInfoSection = ({ formData, onInputChange, isLoading }: PersonalInf
         />
       </div>
       
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-          Email Address
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => onInputChange('email', e.target.value)}
-          placeholder="Enter your email"
-          required
-          disabled={isLoading}
-          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
-        />
-      </div>
+      <EmailInput
+        id="signup-email"
+        label="Email Address"
+        value={formData.email}
+        onChange={(value) => onInputChange('email', value)}
+        placeholder="Enter your email"
+        required
+        disabled={isLoading}
+        className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
+      />
       
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-          Password
-        </Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => onInputChange('password', e.target.value)}
-          placeholder="Minimum 8 characters"
-          required
-          disabled={isLoading}
-          className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
-        />
+      <PasswordInput
+        id="signup-password"
+        label="Password"
+        value={formData.password}
+        onChange={(value) => onInputChange('password', value)}
+        placeholder="Minimum 8 characters"
+        required
+        disabled={isLoading}
+        className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg text-base"
+      />
+      
+      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+        <p className="text-xs text-blue-700 flex items-start gap-2">
+          <span className="text-blue-600 font-medium">💡</span>
+          <span>
+            Your password must be at least 8 characters long. Use a mix of letters, numbers, and symbols for better security.
+          </span>
+        </p>
       </div>
     </div>
   );
