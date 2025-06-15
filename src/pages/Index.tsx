@@ -8,7 +8,7 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import ChallengeRulesSection from '@/components/landing/ChallengeRulesSection';
 import FinalCTASection from '@/components/landing/FinalCTASection';
 import Footer from '@/components/landing/Footer';
-import LiveVisitorCount from '@/components/landing/LiveVisitorCount';
+// import LiveVisitorCount from '@/components/landing/LiveVisitorCount';
 
 const Index = () => {
   console.log('Index page rendering...');
@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       <HeroSection />
-      {/* Removed the in-flow visitor count, now floating */}
+      {/* Visitor count now inside FinalCTASection */}
       <WhySection />
       <TestimonialsSection />
       <CertificateSection />
@@ -24,8 +24,7 @@ const Index = () => {
       <ChallengeRulesSection />
       <FinalCTASection />
       <Footer />
-      {/* Floating component, always visible */}
-      <LiveVisitorCount />
+      {/* Removed floating LiveVisitorCount */}
     </div>
   );
 };
