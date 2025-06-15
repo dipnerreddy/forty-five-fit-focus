@@ -5,6 +5,8 @@ import CertificateSection from './CertificateSection';
 import StatsCards from './StatsCards';
 import WorkoutSettings from './WorkoutSettings';
 import ProgressOverview from './ProgressOverview';
+import CustomWorkoutButton from './CustomWorkoutButton';
+import CustomWorkoutModal from './CustomWorkoutModal';
 import LogoutSection from './LogoutSection';
 import ProfileEditModal from './ProfileEditModal';
 
@@ -28,10 +30,12 @@ interface ProfileContentProps {
   onRoutineChange: () => void;
   onLogout: () => void;
   onProfileUpdate: () => void;
+  onCustomRoutineActivated: (sheetUrl: string) => void;
 }
 
-const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }: ProfileContentProps) => {
+const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate, onCustomRoutineActivated }: ProfileContentProps) => {
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCustomWorkoutModal, setShowCustomWorkoutModal] = useState(false);
 
   return (
     <div className="pb-20 px-4 pt-6 space-y-4">
@@ -62,6 +66,8 @@ const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }:
         streak={profile.streak}
       />
 
+      <CustomWorkoutButton onClick={() => setShowCustomWorkoutModal(true)} />
+
       <LogoutSection onLogout={onLogout} />
 
       <ProfileEditModal
@@ -69,6 +75,12 @@ const ProfileContent = ({ profile, onRoutineChange, onLogout, onProfileUpdate }:
         onClose={() => setShowEditModal(false)}
         profile={profile}
         onProfileUpdate={onProfileUpdate}
+      />
+
+      <CustomWorkoutModal
+        isOpen={showCustomWorkoutModal}
+        onClose={() => setShowCustomWorkoutModal(false)}
+        onCustomRoutineActivated={onCustomRoutineActivated}
       />
     </div>
   );
