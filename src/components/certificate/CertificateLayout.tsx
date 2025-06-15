@@ -1,6 +1,6 @@
 
 import React, { RefObject } from "react";
-import { Flame, CheckCircle } from "lucide-react";
+import { Flame } from "lucide-react";
 
 interface CertificateLayoutProps {
   certificateRef: RefObject<HTMLDivElement>;
@@ -26,43 +26,43 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
   <div
     ref={certificateRef}
     className="
-      relative flex flex-col sm:flex-row w-full max-w-xl sm:rounded-xl rounded-lg
+      relative flex flex-row w-full max-w-xl rounded-lg sm:rounded-xl
       shadow-lg overflow-hidden bg-white
       border border-gray-100 mx-auto 
-      min-h-[320px]
+      min-h-[300px] sm:min-h-[320px]
       animate-fade-in
     "
   >
-    {/* Orange bar (always on left on sm+, top on mobile if vertical scroll) */}
-    <div className="
-      bg-orange-500 flex flex-row sm:flex-col
-      items-center justify-start sm:justify-between
-      px-3 py-3 sm:px-4 sm:py-6
-      sm:min-w-[54px] min-h-[44px] sm:min-h-[340px]
-    ">
-      {/* Icon + vertical label */}
-      <Flame className="text-white sm:mb-4 mb-0" size={28} />
+    {/* Vertical orange bar on the left */}
+    <div
+      className="
+        bg-orange-500 flex flex-col items-center justify-between
+        px-2 py-3
+        min-w-[42px]
+      "
+    >
+      <Flame className="text-white mb-3" size={26} />
       <span
         className="
-          text-[11px] sm:text-xs text-white font-bold tracking-[0.14em]
-          [writing-mode:vertical-rl] sm:rotate-180
-          leading-4 uppercase select-none ml-2 sm:ml-0
-        "
-        style={{ letterSpacing: "0.16em" }}
+          text-[10px] text-white font-bold tracking-[0.16em]
+          [writing-mode:vertical-rl] rotate-180
+          leading-4 uppercase select-none"
       >
         45-DAY CHALLENGE
       </span>
     </div>
     {/* Certificate main info */}
-    <div className="
-      flex-1 flex flex-col 
-      justify-between
-      bg-white
-      px-4 py-3 sm:px-8 sm:py-8
-      gap-2 sm:gap-4
-    ">
+    <div
+      className="
+        flex-1 flex flex-col
+        justify-between
+        bg-white
+        px-4 py-4 sm:px-8 sm:py-8
+        gap-2 sm:gap-4
+      "
+    >
       {/* Headings */}
-      <div className="mt-1">
+      <div className="mt-0">
         <div className="uppercase text-[12px] sm:text-sm tracking-wider text-gray-400 font-semibold mb-1">
           Certificate of Achievement
         </div>
@@ -72,18 +72,17 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
         <div className="text-gray-500 text-xs sm:text-base mb-1">
           This certificate is proudly presented to
         </div>
-        {/* Main Name - size and wrapping for mobile */}
+        {/* Main Name */}
         <div
           className="
-            text-xl sm:text-5xl font-black text-gray-900
+            text-lg sm:text-5xl font-black text-gray-900
             my-2 break-words
-            leading-none sm:leading-tight
-            overflow-x-auto
+            leading-tight sm:leading-tight
             whitespace-normal
             mobile-certificate-name
-          "
+            "
           style={{
-            letterSpacing: "0.04em",
+            letterSpacing: "0.05em",
             wordBreak: "break-word",
           }}
         >
@@ -97,7 +96,7 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
           <span className="font-semibold">45-Day Fitness Challenge</span>
           &nbsp;on the <span className="font-semibold">{routine}</span> Routine.
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 mt-2">
+        <div className="flex flex-row gap-6 mt-2">
           <div>
             <span className="block text-[10px] sm:text-xs font-medium text-slate-500">
               Date
@@ -128,8 +127,6 @@ const CertificateLayout: React.FC<CertificateLayoutProps> = ({
           </span>
         </div>
       </div>
-      {/* Signature/Issuer, optional, can add below for more detail */}
-      {/* <div className="flex justify-end">[Signature]</div> */}
     </div>
   </div>
 );
