@@ -58,6 +58,7 @@ const App = () => {
                     <Signup />
                   </PublicRoute>
                 } />
+                {/* Reset password route - special handling in PublicRoute for recovery links */}
                 <Route path="/reset-password" element={
                   <PublicRoute>
                     <ResetPassword />

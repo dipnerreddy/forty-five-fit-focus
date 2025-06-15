@@ -5,14 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Flame, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 const ResetPassword = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -29,7 +28,7 @@ const ResetPassword = () => {
       console.log('URL search params:', window.location.search);
       console.log('URL hash:', window.location.hash);
       
-      // Check URL parameters
+      // Check URL parameters for recovery tokens
       const urlParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       
@@ -45,64 +44,71 @@ const ResetPassword = () => {
         fullURL: window.location.href
       });
       
-      // Check if we have a valid password reset session
-      if (!accessToken || !refreshToken) {
-        console.log('No tokens found, checking current session...');
+      // Check if this is a password recovery session
+      if (type === 'recovery' && accessToken && refreshToken) {
+        try {
+          console.log('Setting recovery session with tokens...');
+          // Set the session with the recovery tokens
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+
+          if (error) {
+            console.error('Recovery session error:', error);
+            toast({
+              title: "Invalid Link",
+              description: "This password reset link is invalid or has expired.",
+              variant: "destructive"
+            });
+            navigate('/login');
+            return;
+          }
+
+          console.log('Recovery session set successfully:', data);
+          setIsValidSession(true);
+          
+          // Clear the URL parameters to prevent confusion
+          window.history.replaceState({}, document.title, '/reset-password');
+          
+        } catch (error) {
+          console.error('Recovery session setup error:', error);
+          toast({
+            title: "Error",
+            description: "An error occurred while setting up password reset.",
+            variant: "destructive"
+          });
+          navigate('/login');
+        }
+      } else if (!accessToken || !refreshToken) {
+        console.log('No recovery tokens found, checking existing session...');
         
         // Check if user is already logged in with a valid session
         const { data: { session }, error } = await supabase.auth.getSession();
         if (session && !error) {
-          console.log('Found existing session, allowing password reset');
+          console.log('Found existing session, checking if it is a recovery session');
+          // Allow password reset for existing sessions as well
           setIsValidSession(true);
-          setIsInitialized(true);
-          return;
-        }
-        
-        toast({
-          title: "Invalid Link",
-          description: "This password reset link is invalid or has expired. Please request a new one.",
-          variant: "destructive"
-        });
-        navigate('/login');
-        return;
-      }
-
-      try {
-        console.log('Setting session with tokens...');
-        // Set the session with the tokens from the URL
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
-
-        if (error) {
-          console.error('Session error:', error);
+        } else {
+          console.log('No valid session found');
           toast({
             title: "Invalid Link",
-            description: "This password reset link is invalid or has expired.",
+            description: "This password reset link is invalid or has expired. Please request a new one.",
             variant: "destructive"
           });
           navigate('/login');
-          return;
         }
-
-        console.log('Session set successfully:', data);
-        setIsValidSession(true);
-        
-        // Clear the URL parameters to prevent confusion
-        window.history.replaceState({}, document.title, '/reset-password');
-        
-      } catch (error) {
-        console.error('Session setup error:', error);
+      } else {
+        console.log('Invalid recovery type or missing parameters');
         toast({
-          title: "Error",
-          description: "An error occurred while setting up password reset.",
+          title: "Invalid Link",
+          description: "This password reset link is invalid or has expired.",
           variant: "destructive"
         });
         navigate('/login');
-      } finally {
-        setIsInitialized(true);
       }
+      
+      setIsInitialized(true);
     };
 
     initializeReset();
@@ -172,7 +178,7 @@ const ResetPassword = () => {
 
       toast({
         title: "Success!",
-        description: "Your password has been updated successfully."
+        description: "Your password has been updated successfully. You can now sign in with your new password."
       });
       
       // Sign out and redirect to login page
@@ -195,7 +201,10 @@ const ResetPassword = () => {
   if (!isInitialized) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 flex items-center justify-center">
-        <div className="text-lg">Initializing password reset...</div>
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-600">Setting up password reset...</span>
+        </div>
       </div>
     );
   }
@@ -204,9 +213,10 @@ const ResetPassword = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-lg">Invalid or expired reset link</div>
-          <Link to="/login" className="text-orange-600 hover:text-orange-700">
-            Return to login
+          <div className="text-lg text-red-600">Invalid or expired reset link</div>
+          <p className="text-gray-600">Please request a new password reset link from the login page.</p>
+          <Link to="/login" className="inline-block bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+            Back to Login
           </Link>
         </div>
       </div>

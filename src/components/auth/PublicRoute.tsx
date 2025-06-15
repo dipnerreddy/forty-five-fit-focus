@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PublicRouteProps {
@@ -9,6 +9,7 @@ interface PublicRouteProps {
 
 const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +20,22 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
     const checkAuth = async () => {
       try {
         console.log('PublicRoute: Checking authentication...');
+        
+        // Special handling for password reset page
+        if (location.pathname === '/reset-password') {
+          // Check if this is a recovery link (has tokens in URL)
+          const urlParams = new URLSearchParams(window.location.search);
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const type = urlParams.get('type') || hashParams.get('type');
+          
+          // If it's a recovery link, allow access regardless of auth state
+          if (type === 'recovery') {
+            console.log('PublicRoute: Recovery link detected, allowing access to reset page');
+            setIsAuthenticated(false);
+            setIsLoading(false);
+            return;
+          }
+        }
         
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
@@ -33,13 +50,19 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
         console.log('PublicRoute: Session data:', session ? 'User logged in' : 'No session');
         
         if (session) {
-          console.log('PublicRoute: User authenticated, redirecting to dashboard...');
-          navigate('/dashboard');
-          return;
+          // Don't redirect if on reset password page - allow password reset even when logged in
+          if (location.pathname === '/reset-password') {
+            console.log('PublicRoute: User authenticated but on reset page, allowing access');
+            setIsAuthenticated(false);
+          } else {
+            console.log('PublicRoute: User authenticated, redirecting to dashboard...');
+            navigate('/dashboard');
+            return;
+          }
+        } else {
+          console.log('PublicRoute: No session, showing public content');
+          setIsAuthenticated(false);
         }
-        
-        console.log('PublicRoute: No session, showing public content');
-        setIsAuthenticated(false);
       } catch (error) {
         console.error('PublicRoute: Auth check error:', error);
         setError(`Auth check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -56,6 +79,14 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
       (event, session) => {
         console.log('PublicRoute: Auth state change:', event, session ? 'User logged in' : 'No session');
         
+        // Special handling for password reset page
+        if (location.pathname === '/reset-password') {
+          console.log('PublicRoute: On reset page, not redirecting on auth change');
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        
         if (session) {
           console.log('PublicRoute: Auth state change - redirecting to dashboard');
           navigate('/dashboard');
@@ -71,7 +102,7 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
       console.log('PublicRoute: Cleaning up auth listener');
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   if (error) {
     return (

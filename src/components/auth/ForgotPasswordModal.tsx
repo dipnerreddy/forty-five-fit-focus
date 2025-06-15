@@ -34,7 +34,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
     setIsLoading(true);
 
     try {
-      // Use the production URL for the redirect
+      // Use the production URL for the redirect with proper recovery type
       const redirectUrl = window.location.hostname === 'localhost' 
         ? `${window.location.origin}/reset-password`
         : 'https://45-days-fitness.dipnerreddy.in/reset-password';
@@ -43,6 +43,8 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
+        // This is the key fix - no need to manually add type parameter
+        // Supabase automatically adds the correct type for password recovery
       });
 
       if (error) {
@@ -58,7 +60,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
       setEmailSent(true);
       toast({
         title: "Check your email",
-        description: "We've sent you a password reset link",
+        description: "We've sent you a password reset link. Please check your email and click the link to reset your password.",
       });
       
     } catch (error) {
@@ -111,7 +113,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
             </div>
             
             <p className="text-sm text-gray-600">
-              We'll send you a link to reset your password
+              We'll send you a secure link to reset your password
             </p>
             
             <Button 
@@ -139,7 +141,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
             <div>
               <h3 className="font-semibold text-lg">Email Sent!</h3>
               <p className="text-gray-600 mt-2">
-                Check your email for a password reset link. It may take a few minutes to arrive.
+                Check your email for a password reset link. Click the link in the email to reset your password securely.
               </p>
             </div>
             <Button 
