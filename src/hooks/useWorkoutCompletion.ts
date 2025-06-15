@@ -20,6 +20,7 @@ interface UseWorkoutCompletionProps {
   refreshWorkoutStatus: () => void;
 }
 
+// Added: restDayBypass param to allow forced completion on rest day
 export const useWorkoutCompletion = ({
   user,
   setUser,
@@ -31,8 +32,9 @@ export const useWorkoutCompletion = ({
 }: UseWorkoutCompletionProps) => {
   const { toast } = useToast();
 
-  const completeWorkout = async () => {
-    if (!canCompleteToday) {
+  // restDayBypass skips normal completion checks for rest days
+  const completeWorkout = async (restDayBypass?: boolean) => {
+    if (!canCompleteToday && !restDayBypass) {
       toast({
         title: "Workout Already Complete",
         description: "You've already completed your workout for today. Come back tomorrow at 3 AM IST!",
@@ -124,8 +126,12 @@ export const useWorkoutCompletion = ({
       }
 
       toast({
-        title: "Workout Complete! 🎉",
-        description: `Day ${user.currentDay} conquered! Next workout available at 3 AM IST tomorrow.`
+        title: restDayBypass
+          ? "Rest Day Complete! 🌟"
+          : "Workout Complete! 🎉",
+        description: restDayBypass
+          ? `You took a healthy rest! Streak maintained, see you for the next session.`
+          : `Day ${user.currentDay} conquered! Next workout available at 3 AM IST tomorrow.`
       });
     } catch (error) {
       console.error('Error completing workout:', error);

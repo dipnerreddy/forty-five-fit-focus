@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useWorkoutCompletion } from '@/hooks/useWorkoutCompletion';
@@ -61,7 +62,45 @@ const Dashboard = () => {
 
   const [dailyQuote] = useState("Your only limit is your mind. Push through the resistance!");
 
+  // ----- Rest Day Auto-completion Logic -----
+  // We'll use a ref to ensure auto-completion only happens once per rest day
+  const restCompleteRef = useRef(false);
+
+  // Determine rest day: no workout, but also check the workoutDetails
+  const isRestDay =
+    (!workoutDataLoading && todaysWorkout.length === 0) && (
+      (workoutDetails?.dayTitle?.toLowerCase() === "rest day" ||
+      workoutDetails?.dayTitle?.toLowerCase() === "rest" ||
+      workoutDetails?.dayFocus?.toLowerCase() === "rest day" ||
+      workoutDetails?.dayFocus?.toLowerCase() === "rest")
+    );
+
+  useEffect(() => {
+    // Only auto-complete ONCE per rest day per visit
+    if (
+      isRestDay &&
+      canCompleteToday &&
+      !isLoading &&
+      !workoutStatusLoading &&
+      !restCompleteRef.current
+    ) {
+      restCompleteRef.current = true;
+      // Auto-complete and bypass streak limitation
+      handleCompleteWorkout(true); // Pass true to bypass limitation
+    }
+    // Reset flag if day/routine/user changes
+    if (!isRestDay) {
+      restCompleteRef.current = false;
+    }
+    // eslint-disable-next-line
+  }, [isRestDay, canCompleteToday, isLoading, workoutStatusLoading, user.currentDay, user.routine, user.name]);
+
   const completeWorkout = async () => {
+    if (todaysWorkout.length === 0 && isRestDay) {
+      // Should never trigger (auto-completes), but handle anyway
+      await handleCompleteWorkout(true);
+      return;
+    }
     if (!isWorkoutComplete()) {
       toast({
         title: "Workout Incomplete",
