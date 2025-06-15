@@ -31,7 +31,6 @@ const Footer = () => {
               <span>Made with dedication for serious challengers</span>
             </div>
           </div>
-
           {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-orange-400">Quick Links</h4>
@@ -64,7 +63,6 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-
           {/* Contact */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-orange-400">Get in Touch</h4>
@@ -84,15 +82,15 @@ const Footer = () => {
             © {currentYear} 45-Day Challenge. All rights reserved.
           </div>
           <div className="flex gap-6 text-xs text-gray-500">
-            <button onClick={handleScroll('privacy')} className="hover:text-gray-400 transition-colors">
+            <Link to="/privacy" className="hover:text-gray-400 transition-colors">
               Privacy Policy
-            </button>
-            <button onClick={handleScroll('terms')} className="hover:text-gray-400 transition-colors">
+            </Link>
+            <Link to="/terms" className="hover:text-gray-400 transition-colors">
               Terms of Service
-            </button>
-            <button onClick={handleScroll('cookies')} className="hover:text-gray-400 transition-colors">
+            </Link>
+            <Link to="/cookies" className="hover:text-gray-400 transition-colors">
               Cookie Policy
-            </button>
+            </Link>
           </div>
         </div>
       </div>

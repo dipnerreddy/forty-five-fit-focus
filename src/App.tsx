@@ -17,6 +17,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 import VerifyCertificate from "./pages/VerifyCertificate";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +70,11 @@ const App = () => {
                 
                 {/* New: Public certificate verification */}
                 <Route path="/verify/:credentialId" element={<VerifyCertificate />} />
+                
+                {/* New Legal Pages */}
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
                 
                 {/* Protected routes - only accessible when logged in */}
                 <Route path="/dashboard" element={
