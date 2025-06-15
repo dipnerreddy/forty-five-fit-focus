@@ -12,13 +12,18 @@ max_rows = 1000
 enabled = true
 port = 54324
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://pjoetqssccgixqnptytq.supabase.co"]
+additional_redirect_urls = ["https://pjoetqssccgixqnptytq.supabase.co", "https://45-days-fitness.dipnerreddy.in/reset-password"]
 jwt_expiry = 3600
 
 [auth.email]
 enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
+
+# Add custom email template configuration for password reset
+[auth.email.template.recovery]
+subject = "Reset Your Password"
+content_path = "./supabase/templates/recovery.html"
 
 [db]
 port = 54322

@@ -34,11 +34,19 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
     setIsLoading(true);
 
     try {
+      // Use the production URL for the redirect
+      const redirectUrl = window.location.hostname === 'localhost' 
+        ? `${window.location.origin}/reset-password`
+        : 'https://45-days-fitness.dipnerreddy.in/reset-password';
+      
+      console.log('Sending password reset with redirect URL:', redirectUrl);
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password?type=recovery`,
+        redirectTo: redirectUrl,
       });
 
       if (error) {
+        console.error('Password reset error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -54,6 +62,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }: ForgotPasswordModalProps) => {
       });
       
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
