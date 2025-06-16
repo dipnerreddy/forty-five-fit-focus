@@ -1,73 +1,155 @@
-# Welcome to your Lovable project
+# 💪 45-Day Fitness Challenge – Fullstack Web App
 
-## Project info
+A sleek, mobile-first fitness tracking platform that guides users through a 45-day challenge with daily gym or home workouts, streak tracking, weekly progress summaries, and a shareable certificate.
 
-**URL**: https://lovable.dev/projects/6db171a0-1350-41e0-968b-9648d5843225
+---
 
-## How can I edit this code?
+## 📌 Key Features
 
-There are several ways of editing your application.
+- 🔐 **User Auth**: Simple email + password login/signup  
+- 🏋️ **Workout Modes**: Choose either **Home** or **Gym** workouts (non-switchable mid-challenge)  
+- ✅ **Daily Tracker**: Daily workouts with checkbox per set + manual weight input  
+- 🔥 **Streak Logic**: Missing a day resets progress to Day 1  
+- 📊 **Weekly Summary**: Graphical insights for progress and weight  
+- ✉️ **Email Nudges**: Daily reminders & motivational encouragements  
+- 💬 **Motivational Quotes**: Daily inspiration on dashboard  
+- 📄 **Completion Certificate**: Shareable link with Open Graph preview  
+- 🎨 **Modern UI**: Swiss design, white space heavy, inspired by [21st.dev](https://21st.dev)  
+- 📱 **Mobile-First Design**: Optimized for phone-first experiences  
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6db171a0-1350-41e0-968b-9648d5843225) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: Next.js 14, Tailwind CSS 4.0, ShadCN/UI, TypeScript  
+- **Backend**: Supabase (Auth + DB), Node.js APIs  
+- **Design System**: 21st.dev-style compound components  
+- **Workout Source**: Google Sheets CSV (Gym & Home)  
+- **Charts**: Recharts or Chart.js  
+- **Deployment**: Vercel  
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🧠 Product Requirements Document (PRD)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 1. 👤 User Flow
 
-Follow these steps:
+| Step     | Description                                              |
+|----------|----------------------------------------------------------|
+| Signup   | Name, Age, Weight, Gender, Routine (Home or Gym)         |
+| Routine  | User selects workout type; cannot change mid-challenge  |
+| Dashboard| Shows current day workout, motivational quote, streak   |
+| Weekly   | Shows progress graph + weight data                      |
+| Completion| 45th day ends → certificate generated & sharable link |
+| Reset    | If a day is missed, streak resets to Day 1              |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 2. 📅 Daily Workout Page
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Daily data pulled from Google Sheets CSV  
+- User sees exercises for the day (Gym or Home routine)  
+- Each exercise has 4 sets × 8 reps  
+- User manually enters weight used  
+- Each set has a checkbox  
+- Day marked complete only when **all sets are done**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+### 3. 📈 Weekly Summary Page
+
+- Line graph showing:
+  - Weight change over time  
+  - Total sets completed  
+  - Current streak  
+- Weekly goal reflection  
+
+---
+
+### 4. 💌 Email Notifications
+
+- **Signup Email**: Custom HTML email with call to confirm  
+- **Password Reset**: Secure reset link  
+- **Daily Reminders**: Nudges if a day is missed or pending  
+- **Completion Congrats**: With shareable certificate link  
+
+---
+
+### 5. 🧾 Certificate Generator
+
+- Auto-fills: name, date completed, routine type  
+- Generates sharable link:  
+  `https://45-days-fitness.dipnerreddy.in/verify/`  
+- OG Preview (LinkedIn, WhatsApp, etc.)  
+- Optional: PDF download  
+
+---
+
+### 6. 🔐 Rules & Validations
+
+- 🔄 **Routine Lock**: Cannot switch between Home & Gym once started, If switch progress reset  
+- ❌ **Missed Day = Reset**: No backdating  
+- ✅ **All Sets = Day Complete**  
+- ❌ **No Leaderboards / No Photos**  
+- 🌓 **Dark/Light Mode**: Follows system theme  
+- 📱 **Fully Mobile-Optimized**
+
+---
+
+### 7. 🧰 Components to Build
+
+- `RoutineSelectorCard.tsx` – Choose Home or Gym (first login only)  
+- `WorkoutTracker.tsx` – Checkboxes + manual weight + streak logic  
+- `QuoteCard.tsx` – Rotates daily tips or motivational quotes  
+- `StreakCounter.tsx` – Visually shows progress  
+- `WeeklySummaryChart.tsx` – Displays weight + streak  
+- `CertificatePage.tsx` – Dynamic OG share card + preview  
+
+---
+
+## 🚀 Developer Setup
+
+### 1. Clone the Repo
+```bash
+git clone https://github.com/YOUR_USERNAME/45-day-fitness-app.git
+cd 45-day-fitness-app
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Setup Environment Variables (`.env.local`)
+```
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+GOOGLE_SHEET_CSV=https://docs.google.com/spreadsheets/d/e/2PACX-1vRqDM3PdzUcbRIEKFoga2kmigtYQpN5Fi7UNYch9cckwDcOjR818y6hdTKsGS8K7aOzvzWQmqcpT9Hh/pub?output=csv
+```
+
+### 4. Run Locally
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔮 Future Enhancements
 
-**Use GitHub Codespaces**
+- 🔔 Push Notifications  
+- 🧠 AI Personal Tips Based on Workout Logs  
+- 🌙 Sleep + Water Habit Tracking  
+- 📲 PWA/iOS/Android Export (via Capacitor)  
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 🧑‍🎓 Credits
 
-This project is built with:
+- Made by **Avuthu Dipner Reddy**  
+- Built using OpenAI GPT-4 & design system guidance  
+- Workout Data from Google Sheets (CSV)  
+- Design inspired by: [21st.dev](https://21st.dev)  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/6db171a0-1350-41e0-968b-9648d5843225) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+> “It’s not just about getting fit. It’s about becoming someone who doesn’t quit.”
