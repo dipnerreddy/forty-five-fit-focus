@@ -1,7 +1,10 @@
-# 💪 45-Day Fitness Challenge – Fullstack Web App
+<!-- # 💪 45-Day Fitness Challenge – Fullstack Web App
 
 A sleek, mobile-first fitness tracking platform that guides users through a 45-day challenge with daily gym or home workouts, streak tracking, weekly progress summaries, and a shareable certificate.
 
+---
+## 🌏 URL
+- [45-days-fitness.dipnerreddy.in](https://45-days-fitness.dipnerreddy.in/)
 ---
 
 ## 📌 Key Features
@@ -152,4 +155,4 @@ npm run dev
 
 ---
 
-> “It’s not just about getting fit. It’s about becoming someone who doesn’t quit.”
+> “It’s not just about getting fit. It’s about becoming someone who doesn’t quit.” -->
