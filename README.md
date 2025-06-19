@@ -1,4 +1,4 @@
-<!-- # 💪 45-Day Fitness Challenge – Fullstack Web App
+ # 💪 45-Day Fitness Challenge – Fullstack Web App
 
 A sleek, mobile-first fitness tracking platform that guides users through a 45-day challenge with daily gym or home workouts, streak tracking, weekly progress summaries, and a shareable certificate.
 
@@ -39,7 +39,7 @@ A sleek, mobile-first fitness tracking platform that guides users through a 45-d
 
 | Step     | Description                                              |
 |----------|----------------------------------------------------------|
-| Signup   | Name, Age, Weight, Gender, Routine (Home or Gym)         |
+| Signup   | Name, DoB, Weight, Gender, Routine (Home or Gym)         |
 | Routine  | User selects workout type; cannot change mid-challenge  |
 | Dashboard| Shows current day workout, motivational quote, streak   |
 | Weekly   | Shows progress graph + weight data                      |
@@ -155,4 +155,4 @@ npm run dev
 
 ---
 
-> “It’s not just about getting fit. It’s about becoming someone who doesn’t quit.” -->
+> “It’s not just about getting fit. It’s about becoming someone who doesn’t quit.” 
